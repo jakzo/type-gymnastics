@@ -33,6 +33,10 @@ jobs:
     environment: Release
     steps:
       - uses: actions/checkout@v2
+        with:
+          node-version: ${{ env.node_version }}
+          registry-url: "https://registry.npmjs.org"
+          scope: "@jakzo"
       - run: yarn publish --patch --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
