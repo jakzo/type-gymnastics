@@ -1,3 +1,3 @@
-import { Reverse } from "primitives/string";
+import { String } from "primitives/string";
 
-test<Reverse<"Hello, world!">>(); // $ExpectType "!dlrow ,olleH"
+test<String.Reverse<"Hello, world!">>(); // $ExpectType "!dlrow ,olleH"

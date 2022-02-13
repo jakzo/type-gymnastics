@@ -1,23 +1,190 @@
-import { Reverse } from "./string";
+import { String } from "./string";
 
 export {};
 
-export type Number = Integer | NaN;
-/** Binary integer in BIG ENDIAN (most significant bit comes last, not like
- * the JS binary notation and most other representitations where it comes first). */
-export type Integer = `0b${string}`;
-export type NaN = `NaN`;
-export type Zero = "0b";
-export type One = "0b1";
+export namespace Integer {
+  /** A binary integer, including `NaN`. It is in **big endian** format (most
+   * significant bit comes last, not like the JS binary notation and most other
+   * representitations where it comes first). */
+  type Number = Integer | NaN;
+  /** An integer (not `NaN`). */
+  type Integer = `0b${string}`;
+  /** Not-a-number. When an operation that returns a number is not defined (eg.
+   * dividing by zero) it will return this. */
+  type NaN = `NaN`;
+  /** The number 0 as an `Integer`. */
+  type Zero = "0b";
+  /** The number 1 as an `Integer`. */
+  type One = "0b1";
+
+  /** Returns `true` if `A` is less than `B`, else `false`. */
+  type IsLessThan<A extends Number, B extends Number> = A extends B
+    ? false
+    : A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _IsLessThan<ADigits, BDigits>
+      : false
+    : false;
+
+  /** Returns `true` if `A` is less than or equal to `B`, else `false`. */
+  type IsLessThanOrEqual<A extends Number, B extends Number> = A extends B
+    ? true
+    : IsLessThan<A, B>;
+
+  /** Returns `true` if `A` is greater than `B`, else `false`. */
+  type IsGreaterThan<A extends Number, B extends Number> = A extends B
+    ? false
+    : IsLessThan<A, B> extends true
+    ? false
+    : true;
+
+  /** Returns `true` if `A` is greater than or equal to `B`, else `false`. */
+  type IsGreaterThanOrEqual<A extends Number, B extends Number> = A extends B
+    ? true
+    : IsLessThan<A, B> extends true
+    ? false
+    : true;
+
+  /** Returns bitwise NOT of `N` (all bits flipped).
+   *
+   * Note that this **does not** return one or two's complement (ie. `-N-1`)
+   * like most other languages because negative numbers are not yet supported.
+   * This means that applying `Not` twice will not produce the original number. */
+  type Not<N extends Number> = N extends `0b${infer Digits}`
+    ? _ToIntOrNaN<_Not<Digits>>
+    : NaN;
+
+  /** Returns bitwise AND of `A` and `B`. */
+  type And<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _ToIntOrNaN<_And<ADigits, BDigits>>
+      : NaN
+    : NaN;
+
+  /** Returns bitwise NAND (1 if `A` and `B` are not both 1) of `A` and `B`. */
+  type Nand<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _ToIntOrNaN<_Nand<ADigits, BDigits>>
+      : NaN
+    : NaN;
+
+  /** Returns bitwise OR of `A` and `B`. */
+  type Or<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _ToIntOrNaN<_Or<ADigits, BDigits>>
+      : NaN
+    : NaN;
+
+  /** Returns bitwise XOR of `A` and `B`. */
+  type Xor<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _ToIntOrNaN<_Xor<ADigits, BDigits>>
+      : NaN
+    : NaN;
+
+  /** Returns `N` bitwise shifted `X` times to the left.
+   *
+   * Note that despite integers being notated in big endian, this is named as
+   * if they are in little endian, meaning it makes numbers larger. */
+  type ShiftLeft<
+    N extends Number,
+    X extends Number
+  > = N extends `0b${infer Digits}` ? _ShiftLeft<Digits, X> : NaN;
+
+  /** Returns the sum of `A` and `B`. */
+  type Add<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _ToIntOrNaN<_Add<ADigits, BDigits>>
+      : NaN
+    : NaN;
+
+  /** Returns `N+1`. */
+  type Increment<N extends Number> = Add<N, "0b1">;
+
+  /** Returns `A-B`.
+   *
+   * Note that negative integers are not yet supported so if the result would be
+   * negative it returns `NaN` instead. */
+  type Subtract<
+    A extends Number,
+    B extends Number
+  > = A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _ToIntOrNaN<_Subtract<ADigits, BDigits>>
+      : NaN
+    : NaN;
+
+  /** Returns `N-1`. */
+  type Decrement<N extends Number> = Subtract<N, "0b1">;
+
+  /** Returns the product of `A` and `B`. */
+  type Multiply<
+    A extends Number,
+    B extends Number
+  > = A extends `0b${infer ADigits}`
+    ? B extends `0b${infer BDigits}`
+      ? _ToIntOrNaN<_Multiply<ADigits, BDigits>>
+      : NaN
+    : NaN;
+
+  /** Returns both the `quotient` and `remainder` when dividing `Dividend` by
+   * `Divisor`.
+   *
+   * The division algorithm returns both of these, so prefer this method
+   * over `Divide` and `Modulo` if you need both for efficiency. */
+  type DivMod<
+    Dividend extends Number,
+    Divisor extends Number
+  > = Divisor extends Zero
+    ? { quotient: NaN; remainder: NaN }
+    : Dividend extends `0b${infer ADigits}`
+    ? Divisor extends `0b${infer BDigits}`
+      ? _DivMod<ADigits, BDigits>
+      : { quotient: NaN; remainder: NaN }
+    : { quotient: NaN; remainder: NaN };
+
+  /** Divides `Dividend` by `Divisor` and returns the result rounded down. */
+  // @ts-expect-error - TS says it's "excessively deep" for some reason...
+  type Divide<Dividend extends Number, Divisor extends Number> = DivMod<
+    Dividend,
+    Divisor
+  >["quotient"];
+
+  /** Returns the remainder of dividing `Dividend` by `Divisor`. */
+  type Modulo<Dividend extends Number, Divisor extends Number> = DivMod<
+    Dividend,
+    Divisor
+  >["remainder"];
+
+  /** Converts a string containing a number in the specified base to an integer.
+   * Note that letter digits (like A, B, C, etc.) **must be capitalized**. */
+  type FromBase<N extends string, Base extends Number> = Base extends Integer
+    ? _FromBase<String.Reverse<N>, Base, "0b1">
+    : NaN;
+
+  /** Converts an integer to a string in the specified base. Letter digits
+   * will be capitalized. */
+  type ToBase<N extends Number, Base extends Number> = N extends Integer
+    ? Base extends Integer
+      ? N extends Zero
+        ? _ToDigit<N>
+        : // @ts-expect-error - excessively deep
+          _ToBase<N, Base>
+      : NaN
+    : NaN;
+
+  /** Converts a base-10 string or number into an integer. */
+  type FromDecimal<N extends string | number> = FromBase<`${N}`, Ten>;
+
+  /** Converts an integer to a base-10 string. */
+  type ToDecimal<N extends Number> = ToBase<N, Ten>;
+
+  /** Any base-10 digit character. */
+  type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
+}
+
 type Ten = "0b0101";
 
-export type IsLessThan<A extends Number, B extends Number> = A extends B
-  ? false
-  : A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _IsLessThan<ADigits, BDigits>
-    : false
-  : false;
 type _IsLessThan<
   A extends string,
   B extends string,
@@ -34,21 +201,6 @@ type _IsLessThan<
   ? true
   : IsLesser;
 
-export type IsLessThanOrEqual<A extends Number, B extends Number> = A extends B
-  ? true
-  : IsLessThan<A, B>;
-
-export type IsGreaterThan<A extends Number, B extends Number> = A extends B
-  ? false
-  : IsLessThan<A, B> extends true
-  ? false
-  : true;
-
-export type IsGreaterThanOrEqual<
-  A extends Number,
-  B extends Number
-> = A extends B ? true : IsLessThan<A, B> extends true ? false : true;
-
 type _MapChar<
   S extends string,
   NewChar extends string
@@ -56,32 +208,17 @@ type _MapChar<
   ? `${NewChar}${_MapChar<Rest, NewChar>}`
   : "";
 
-type _ToIntOrNaN<DigitsOrNaN extends string> = DigitsOrNaN extends NaN
+type _ToIntOrNaN<DigitsOrNaN extends string> = DigitsOrNaN extends Integer.NaN
   ? DigitsOrNaN
   : `0b${_StripTrailingZeroes<DigitsOrNaN>}`;
-type _ToIntsOrNaN<DigitsOrNaNTuple extends Record<string | number, string>> = {
-  [K in keyof DigitsOrNaNTuple]: DigitsOrNaNTuple[K] extends string
-    ? _ToIntOrNaN<DigitsOrNaNTuple[K]>
-    : DigitsOrNaNTuple[K];
-};
+
 type _StripTrailingZeroes<Digits extends string> =
   Digits extends `${infer Rest}0` ? _StripTrailingZeroes<Rest> : Digits;
 
-export type Not<N extends Number> = N extends `0b${infer Digits}`
-  ? _ToIntOrNaN<_Not<Digits>>
-  : NaN;
 type _Not<Digits extends string> = Digits extends `${infer Digit}${infer Rest}`
   ? `${Digit extends "1" ? 0 : 1}${_Not<Rest>}`
   : "";
 
-export type And<
-  A extends Number,
-  B extends Number
-> = A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _ToIntOrNaN<_And<ADigits, BDigits>>
-    : NaN
-  : NaN;
 type _And<
   A extends string,
   B extends string
@@ -91,14 +228,6 @@ type _And<
     : _MapChar<A, "0">
   : _MapChar<B, "0">;
 
-export type Nand<
-  A extends Number,
-  B extends Number
-> = A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _ToIntOrNaN<_Nand<ADigits, BDigits>>
-    : NaN
-  : NaN;
 type _Nand<
   A extends string,
   B extends string
@@ -108,14 +237,6 @@ type _Nand<
     : _MapChar<A, "1">
   : _MapChar<B, "1">;
 
-export type Or<
-  A extends Number,
-  B extends Number
-> = A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _ToIntOrNaN<_Or<ADigits, BDigits>>
-    : NaN
-  : NaN;
 type _Or<
   A extends string,
   B extends string
@@ -128,14 +249,6 @@ type _Or<
     : A
   : B;
 
-export type Xor<
-  A extends Number,
-  B extends Number
-> = A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _ToIntOrNaN<_Xor<ADigits, BDigits>>
-    : NaN
-  : NaN;
 type _Xor<
   A extends string,
   B extends string
@@ -145,22 +258,13 @@ type _Xor<
     : A
   : B;
 
-export type ShiftLeft<
-  N extends Number,
-  X extends Number
-> = N extends `0b${infer Digits}` ? _ShiftLeft<Digits, X> : NaN;
-type _ShiftLeft<Digits extends string, X extends Number> = X extends Zero
+type _ShiftLeft<
+  Digits extends string,
+  X extends Integer.Number
+> = Integer.IsLessThanOrEqual<X, Integer.Zero> extends true
   ? Digits
-  : _ShiftLeft<`0${Digits}`, Decrement<X>>;
+  : _ShiftLeft<`0${Digits}`, Integer.Decrement<X>>;
 
-export type Add<
-  A extends Number,
-  B extends Number
-> = A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _ToIntOrNaN<_Add<ADigits, BDigits>>
-    : NaN
-  : NaN;
 type _Add<
   A extends string,
   B extends string,
@@ -179,16 +283,6 @@ type _Add<
   ? "1"
   : "";
 
-export type Increment<N extends Number> = Add<N, "0b1">;
-
-export type Subtract<
-  A extends Number,
-  B extends Number
-> = A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _ToIntOrNaN<_Subtract<ADigits, BDigits>>
-    : NaN
-  : NaN;
 type _Subtract<
   A extends string,
   B extends string,
@@ -211,19 +305,9 @@ type _Subtract<
       >
     : `${Result}${A}`
   : B extends `${infer _BDigit}${infer _BRest}`
-  ? NaN
+  ? Integer.NaN
   : Result;
 
-export type Decrement<N extends Number> = Subtract<N, "0b1">;
-
-export type Multiply<
-  A extends Number,
-  B extends Number
-> = A extends `0b${infer ADigits}`
-  ? B extends `0b${infer BDigits}`
-    ? _ToIntOrNaN<_Multiply<ADigits, BDigits>>
-    : NaN
-  : NaN;
 type _Multiply<
   A extends string,
   B extends string,
@@ -232,16 +316,6 @@ type _Multiply<
   ? _Multiply<`0${A}`, BRest, BDigit extends "1" ? _Add<Result, A> : Result>
   : Result;
 
-export type DivMod<
-  Dividend extends Number,
-  Divisor extends Number
-> = Divisor extends Zero
-  ? { quotient: NaN; remainder: NaN }
-  : Dividend extends `0b${infer ADigits}`
-  ? Divisor extends `0b${infer BDigits}`
-    ? _DivMod<ADigits, BDigits>
-    : { quotient: NaN; remainder: NaN }
-  : { quotient: NaN; remainder: NaN };
 type _DivMod<
   A extends string,
   B extends string,
@@ -266,68 +340,44 @@ type _DivMod2<
           `1${Q}`
         >
       : _DivMod2<A, BRest, PRest, `0${Q}`>
-    : { quotient: NaN; remainder: NaN }
+    : { quotient: Integer.NaN; remainder: Integer.NaN }
   : { quotient: _ToIntOrNaN<Q>; remainder: _ToIntOrNaN<A> };
 interface _DivModResult {
-  quotient: Number;
-  remainder: Number;
+  quotient: Integer.Number;
+  remainder: Integer.Number;
 }
 
-// @ts-expect-error - TS says it's "excessively deep" for some reason...
-export type Divide<Dividend extends Number, Divisor extends Number> = DivMod<
-  Dividend,
-  Divisor
->["quotient"];
-
-export type Modulo<Dividend extends Number, Divisor extends Number> = DivMod<
-  Dividend,
-  Divisor
->["remainder"];
-
-export type FromBase<
-  N extends string,
-  Base extends Number
-> = Base extends Integer ? _FromBase<Reverse<N>, Base, "0b1"> : NaN;
 type _FromBase<
   Num extends string,
-  Base extends Integer,
-  Power extends Integer
+  Base extends Integer.Integer,
+  Power extends Integer.Integer
 > = Num extends `${infer Digit}${infer Rest}`
-  ? Add<
-      Multiply<_FromDigit<Digit>, Power>,
-      _FromBase<Rest, Base, Multiply<Power, Base>>
+  ? Integer.Add<
+      Integer.Multiply<_FromDigit<Digit>, Power>,
+      _FromBase<Rest, Base, Integer.Multiply<Power, Base>>
     >
   : "0b";
 
-export type ToBase<N extends Number, Base extends Number> = N extends Integer
-  ? Base extends Integer
-    ? N extends Zero
-      ? _ToDigit<N>
-      : // @ts-expect-error - excessively deep
-        _ToBase<N, Base>
-    : NaN
-  : NaN;
 type _ToBase<
-  N extends Integer,
-  Base extends Integer,
-  Result extends _DivModResult = DivMod<N, Base>,
+  N extends Integer.Integer,
+  Base extends Integer.Integer,
+  Result extends _DivModResult = Integer.DivMod<N, Base>,
   Digit extends string = _ToDigit<Result["remainder"]>
-> = N extends Zero
+> = N extends Integer.Zero
   ? ""
   : // @ts-expect-error - excessively deep in v4.6
     `${_ToBase<
-      Result["quotient"] extends Integer ? Result["quotient"] : Zero,
+      Result["quotient"] extends Integer.Integer
+        ? Result["quotient"]
+        : Integer.Zero,
       Base
     >}${Digit}`;
-
-export type FromDecimal<N extends string | number> = FromBase<`${N}`, Ten>;
-export type ToDecimal<N extends Number> = ToBase<N, Ten>;
 
 // Generated with:
 // a=[];for(i=0;i<36;i++)a.push(`"${i.toString(36).toUpperCase()}": "0b${[...i.toString(2)].reverse().join('')}",`);console.log(a.join('\n'))
 type _FromDigit<Digit extends string> = Digit extends keyof _DigitToNum
   ? _DigitToNum[Digit]
-  : NaN;
+  : Integer.NaN;
 interface _DigitToNum {
   "0": "0b0";
   "1": "0b1";
@@ -366,9 +416,9 @@ interface _DigitToNum {
   Y: "0b010001";
   Z: "0b110001";
 }
-type _ToDigit<Num extends Number> = Num extends keyof _NumToDigit
+type _ToDigit<Num extends Integer.Number> = Num extends keyof _NumToDigit
   ? _NumToDigit[Num]
-  : NaN;
+  : Integer.NaN;
 interface _NumToDigit {
   "0b": "0";
   "0b1": "1";
@@ -407,5 +457,3 @@ interface _NumToDigit {
   "0b010001": "Y";
   "0b110001": "Z";
 }
-
-export type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;

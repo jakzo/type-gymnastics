@@ -1,34 +1,31 @@
-import {
-  Add,
-  Digit,
-  Divide,
-  FromDecimal,
-  Modulo,
-  Multiply,
-  NaN,
-  Number,
-  Subtract,
-  ToDecimal,
-} from "../primitives/integer";
+import { Integer } from "../primitives/integer";
 
 export {};
+
+export namespace Math {
+  /** Evaluates a mathematical equation. Allowed operators are add (+), subtract
+   * (-), multiply (*), divide (/) and modulo (%). Parentheses are also allowed.
+   *
+   * Note that negative integers are not yet supported so if an intermediate
+   * step ever evaluates to a negative number the result will be `NaN`. */
+  type Evaluate<Expression extends string> = _Eval<Expression>;
+}
 
 type Operators = Operators1 | Operators2;
 type Operators1 = "+" | "-";
 type Operators2 = "*" | "/" | "%";
 
-export type EvaluateMathExpression<Expr extends string> = _Eval<Expr>;
 type _Eval<
   Expr extends string,
   OutputStack extends string[] = [],
   OperatorStack extends string[] = [],
   NumToken extends string = ""
 > = Expr extends `${infer Ch}${infer Rest}`
-  ? Ch extends Digit
+  ? Ch extends Integer.Digit
     ? _Eval<
         Rest,
         [
-          FromDecimal<`${NumToken}${Ch}`>,
+          Integer.FromDecimal<`${NumToken}${Ch}`>,
           ...(NumToken extends ""
             ? OutputStack
             : OutputStack extends [string, ...infer OutputStackRest]
@@ -58,15 +55,15 @@ type _Eval<
             OperatorStackRest extends string[] ? OperatorStackRest : []
           >
         : _ApplyOpFromStack<Op, Expr, OutputStack, OperatorStackRest>
-      : NaN
+      : Integer.NaN
     : _Eval<Rest, OutputStack, OperatorStack>
   : OperatorStack extends [infer Op, ...infer OperatorStackRest]
   ? _ApplyOpFromStack<Op, Expr, OutputStack, OperatorStackRest>
   : OutputStack extends [infer N]
-  ? N extends Number
-    ? ToDecimal<N>
-    : NaN
-  : NaN;
+  ? N extends Integer.Number
+    ? Integer.ToDecimal<N>
+    : Integer.NaN
+  : Integer.NaN;
 type _ApplyOpFromStack<
   Op,
   Expr extends string,
@@ -85,7 +82,7 @@ type _ApplyOpFromStack<
       ],
       OperatorStack extends string[] ? OperatorStack : []
     >
-  : NaN;
+  : Integer.NaN;
 type _IsGreaterOrEqualPrecedence<
   A extends string,
   B extends string
@@ -102,18 +99,18 @@ type _ApplyOp<
   Op extends Operators,
   A extends string,
   B extends string
-> = A extends Number
-  ? B extends Number
+> = A extends Integer.Number
+  ? B extends Integer.Number
     ? Op extends "+"
-      ? Add<A, B>
+      ? Integer.Add<A, B>
       : Op extends "-"
-      ? Subtract<A, B>
+      ? Integer.Subtract<A, B>
       : Op extends "*"
-      ? Multiply<A, B>
+      ? Integer.Multiply<A, B>
       : Op extends "/"
-      ? Divide<A, B>
+      ? Integer.Divide<A, B>
       : Op extends "%"
-      ? Modulo<A, B>
-      : NaN
-    : NaN
-  : NaN;
+      ? Integer.Modulo<A, B>
+      : Integer.NaN
+    : Integer.NaN
+  : Integer.NaN;

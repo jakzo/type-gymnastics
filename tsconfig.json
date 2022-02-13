@@ -10,5 +10,9 @@
     "moduleResolution": "node",
     "paths": { "@jakzo/ts-gym": ["."] },
     "noEmit": true
+  },
+  "typedocOptions": {
+    "entryPoints": ["./index.d.ts"],
+    "out": "docs"
   }
 }

@@ -8,8 +8,9 @@ TypeScript's type system is pretty powerful and as it turns out, is turing-compl
 npm install --save-dev @jakzo/type-gymnastics
 ```
 
+your-code.ts:
+
 ```ts
-// your-code.ts
 import type { EvaluateMathExpression } from "@jakzo/type-gymnastics";
 
 type Result = EvaluateMathExpression<"12 + 34 - 5*(6*7 % 8) + 9">;
