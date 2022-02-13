@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "lib": [],
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "paths": { "@jakzo/ts-gym": ["."] },
+    "noEmit": true
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@jakzo/type-gymnastics",
+  "version": "1.0.0",
+  "description": "Collection of crazy advanced types in TypeScript.",
+  "types": "index.d.ts",
+  "author": "jakzo",
+  "license": "MIT",
+  "homepage": "https://github.com/jakzo/type-gymnastics#readme",
+  "repository": "git@github.com:jakzo/type-gymnastics.git",
+  "bugs": {
+    "url": "https://github.com/jakzo/type-gymnastics/issues"
+  },
+  "files": [
+    "**/*.d.ts"
+  ],
+  "scripts": {
+    "test": "prettier --check . && dtslint .",
+    "util:print-version": "echo $npm_package_version"
+  },
+  "devDependencies": {
+    "@definitelytyped/dtslint": "^0.0.103",
+    "prettier": "^2.5.1",
+    "typescript": "^4.6.1-rc"
+  }
+}
