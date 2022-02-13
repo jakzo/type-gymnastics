@@ -38,14 +38,12 @@ jobs:
           node-version: ${{ env.node_version }}
           registry-url: "https://registry.npmjs.org"
           scope: "@jakzo"
+      - run: git config --global user.name "github-actions[bot]" &&
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
       - run: yarn publish --patch --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: |
-          set -e
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git push --no-verify
+      - run: git push --no-verify
       - id: version
         run: echo "::set-output name=version::$(yarn --silent util:print-version)"
       - uses: actions/create-release@v1
