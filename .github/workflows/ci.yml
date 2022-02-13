@@ -32,6 +32,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' }}
     environment: Release
     steps:
+      - uses: actions/checkout@v2
       - run: yarn publish --patch --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
