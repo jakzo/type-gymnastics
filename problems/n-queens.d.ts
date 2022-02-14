@@ -29,10 +29,10 @@ export namespace Problems {
    *       Problems.NQueens<Integer.FromDecimal<4>, Integer.FromDecimal<4>>,
    *       Integer.FromDecimal<4>
    *     >; // => "
-   *     ◻️ ♕ ◻️ ◼️
-   *     ◼️ ◻️ ◼️ ♕
-   *     ♕ ◼️ ◻️ ◼️
-   *     ◼️ ◻️ ♕ ◻️"
+   *     // ◻️ ♕ ◻️ ◼️
+   *     // ◼️ ◻️ ◼️ ♕
+   *     // ♕ ◼️ ◻️ ◼️
+   *     // ◼️ ◻️ ♕ ◻️"
    */
   type NQueensVisualized<
     Queens extends _Queen[] = NQueens,

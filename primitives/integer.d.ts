@@ -188,7 +188,7 @@ export namespace Integer {
    *       Integer.Increment<Integer.FromDecimal<5>>
    *     >; // => "6"
    */
-  type Increment<N extends Number> = Add<N, "0b1">;
+  type Increment<N extends Number> = Add<N, One>;
 
   /**
    * Returns `A-B`.
@@ -221,7 +221,7 @@ export namespace Integer {
    *       Integer.Decrement<Integer.FromDecimal<5>>
    *     >; // => "4"
    */
-  type Decrement<N extends Number> = Subtract<N, "0b1">;
+  type Decrement<N extends Number> = Subtract<N, One>;
 
   /**
    * Returns the product of `A` and `B`.
@@ -320,7 +320,7 @@ export namespace Integer {
     : NaN;
 
   /**
-   * Converts a base-10 string or number into an integer.
+   * Converts a base-10 string or number into an {@link Integer}.
    *
    * @example
    *     type R = Integer.FromDecimal<"6">; // => "0b011"
@@ -328,7 +328,7 @@ export namespace Integer {
   type FromDecimal<N extends string | number> = FromBase<`${N}`, Ten>;
 
   /**
-   * Converts an integer to a base-10 string.
+   * Converts an {@link Integer} to a base-10 string.
    *
    * @example
    *     type R = Integer.ToDecimal<"0b011">; // => "6"
