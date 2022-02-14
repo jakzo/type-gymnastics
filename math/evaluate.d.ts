@@ -10,7 +10,7 @@ export namespace Math {
    * Parentheses and whitespace are also allowed.
    *
    * Note that negative integers are not yet supported so if an intermediate
-   * step ever evaluates to a negative number the result will be `NaN`.
+   * step ever evaluates to a negative number the result will be {@link NaN}.
    *
    * @example
    *     type R = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">; // => "45"

@@ -9,19 +9,19 @@ export {};
  */
 export namespace Integer {
   /**
-   * A binary integer, including `NaN`. It is in **big endian** format (most
+   * A binary integer, including {@link NaN}. It is in **big endian** format (most
    * significant bit comes last, not like the JS binary notation and most other
    * representitations where it comes first).
    *
    * @example
-   *     "0b01101" // 22 in decimal
+   *     const n: Integer.Number = "0b01101"; // 22 in decimal
    */
   type Number = Integer | NaN;
   /**
-   * An integer (not `NaN`).
+   * A concrete integer (not {@link NaN}).
    *
    * @example
-   *     "0b01101" // 22 in decimal
+   *     const n: Integer.Number = "0b01101"; // 22 in decimal
    */
   type Integer = `0b${string}`;
   /**
@@ -29,9 +29,9 @@ export namespace Integer {
    * dividing by zero) it will return this.
    */
   type NaN = `NaN`;
-  /** The number 0 as an `Integer`. */
+  /** The number 0 as an {@link Integer}. */
   type Zero = "0b";
-  /** The number 1 as an `Integer`. */
+  /** The number 1 as an {@link Integer}. */
   type One = "0b1";
 
   /**
@@ -144,7 +144,7 @@ export namespace Integer {
    * Returns bitwise XOR of `A` and `B`.
    *
    * @example
-   *     type R = Integer.And<"0b01101", "0b11001">; // => "0b01001"
+   *     type R = Integer.Xor<"0b01101", "0b11001">; // => "0b01001"
    */
   type Xor<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
     ? B extends `0b${infer BDigits}`
@@ -194,7 +194,7 @@ export namespace Integer {
    * Returns `A-B`.
    *
    * Note that negative integers are not yet supported so if the result would be
-   * negative it returns `NaN` instead.
+   * negative it returns {@link NaN} instead.
    *
    * @example
    *     type R = Integer.ToDecimal<
@@ -245,7 +245,7 @@ export namespace Integer {
    * `Divisor`.
    *
    * The division algorithm returns both of these, so prefer this method
-   * over `Divide` and `Modulo` if you need both for efficiency.
+   * over {@link Divide} and {@link Modulo} if you need both for efficiency.
    *
    * @example
    *     type R = Integer.ToDecimal<
