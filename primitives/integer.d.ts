@@ -9,15 +9,34 @@ import * as String from "./string";
 
 export {};
 
+type _MapChar<
+  S extends string,
+  NewChar extends string
+> = S extends `${infer _Char}${infer Rest}`
+  ? `${NewChar}${_MapChar<Rest, NewChar>}`
+  : "";
+
+type _ToIntOrNaN<DigitsOrNaN extends string> = DigitsOrNaN extends NaN
+  ? DigitsOrNaN
+  : `0b${_StripTrailingZeroes<DigitsOrNaN>}`;
+
+type _StripTrailingZeroes<Digits extends string> =
+  Digits extends `${infer Rest}0` ? _StripTrailingZeroes<Rest> : Digits;
+
 /**
  * A binary integer, including {@link NaN}. It is in **big endian** format (most
  * significant bit comes last, not like the JS binary notation and most other
  * representitations where it comes first).
  *
+ * This is binary big-integer implementation. These are strings of the format `"0b${1 | 0}..."`.
+ * Each character is a bit. Due to TypeScript recursion limitations, you may encounter
+ * issues using integers larger than 32 bits in size.
+ *
  * @example
  *     const n: Integer.Number = "0b01101"; // 22 in decimal
  */
 export type Number = Integer | NaN;
+
 /**
  * A concrete integer (not {@link NaN}).
  *
@@ -25,15 +44,23 @@ export type Number = Integer | NaN;
  *     const n: Integer.Number = "0b01101"; // 22 in decimal
  */
 export type Integer = `0b${string}`;
+
 /**
  * Not-a-number. When an operation that returns a number is not defined (eg.
  * dividing by zero) it will return this.
  */
 export type NaN = `NaN`;
+
 /** The number 0 as an {@link Integer}. */
 export type Zero = "0b";
+
 /** The number 1 as an {@link Integer}. */
 export type One = "0b1";
+
+type _Ten = "0b0101";
+
+/** Any base-10 digit character. */
+export type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
 
 /**
  * Returns `true` if `A` is less than `B`, else `false`.
@@ -50,6 +77,22 @@ export type IsLessThan<A extends Number, B extends Number> = A extends B
     ? _IsLessThan<ADigits, BDigits>
     : false
   : false;
+
+type _IsLessThan<
+  A extends string,
+  B extends string,
+  IsLesser = false
+> = A extends `${infer ADigit}${infer ARest}`
+  ? B extends `${infer BDigit}${infer BRest}`
+    ? _IsLessThan<
+        ARest,
+        BRest,
+        ADigit extends BDigit ? IsLesser : ADigit extends "1" ? false : true
+      >
+    : false
+  : B extends `${infer _BDigit}${infer _BRest}`
+  ? true
+  : IsLesser;
 
 /**
  * Returns `true` if `A` is less than or equal to `B`, else `false`.
@@ -104,6 +147,10 @@ export type Not<N extends Number> = N extends `0b${infer Digits}`
   ? _ToIntOrNaN<_Not<Digits>>
   : NaN;
 
+type _Not<Digits extends string> = Digits extends `${infer Digit}${infer Rest}`
+  ? `${Digit extends "1" ? 0 : 1}${_Not<Rest>}`
+  : "";
+
 /**
  * Returns bitwise AND of `A` and `B`.
  *
@@ -118,6 +165,15 @@ export type And<
     ? _ToIntOrNaN<_And<ADigits, BDigits>>
     : NaN
   : NaN;
+
+type _And<
+  A extends string,
+  B extends string
+> = A extends `${infer ADigit}${infer ARest}`
+  ? B extends `${infer BDigit}${infer BRest}`
+    ? `${`${ADigit}${BDigit}` extends "11" ? 1 : 0}${_And<ARest, BRest>}`
+    : _MapChar<A, "0">
+  : _MapChar<B, "0">;
 
 /**
  * Returns bitwise NAND (1 if `A` and `B` are not both 1) of `A` and `B`.
@@ -134,6 +190,15 @@ export type Nand<
     : NaN
   : NaN;
 
+type _Nand<
+  A extends string,
+  B extends string
+> = A extends `${infer ADigit}${infer ARest}`
+  ? B extends `${infer BDigit}${infer BRest}`
+    ? `${`${ADigit}${BDigit}` extends "11" ? 0 : 1}${_Nand<ARest, BRest>}`
+    : _MapChar<A, "1">
+  : _MapChar<B, "1">;
+
 /**
  * Returns bitwise OR of `A` and `B`.
  *
@@ -148,6 +213,18 @@ export type Or<
     ? _ToIntOrNaN<_Or<ADigits, BDigits>>
     : NaN
   : NaN;
+
+type _Or<
+  A extends string,
+  B extends string
+> = A extends `${infer ADigit}${infer ARest}`
+  ? B extends `${infer BDigit}${infer BRest}`
+    ? `${ADigit extends "1" ? 1 : BDigit extends "1" ? 1 : 0}${_Or<
+        ARest,
+        BRest
+      >}`
+    : A
+  : B;
 
 /**
  * Returns bitwise XOR of `A` and `B`.
@@ -164,6 +241,15 @@ export type Xor<
     : NaN
   : NaN;
 
+type _Xor<
+  A extends string,
+  B extends string
+> = A extends `${infer ADigit}${infer ARest}`
+  ? B extends `${infer BDigit}${infer BRest}`
+    ? `${ADigit extends BDigit ? 0 : 1}${_Xor<ARest, BRest>}`
+    : A
+  : B;
+
 /**
  * Returns `N` bitwise shifted `X` times to the left.
  *
@@ -177,6 +263,13 @@ export type ShiftLeft<
   N extends Number,
   X extends Number
 > = N extends `0b${infer Digits}` ? _ShiftLeft<Digits, X> : NaN;
+
+type _ShiftLeft<Digits extends string, X extends Number> = IsLessThanOrEqual<
+  X,
+  Zero
+> extends true
+  ? Digits
+  : _ShiftLeft<`0${Digits}`, Decrement<X>>;
 
 /**
  * Returns the sum of `A` and `B`.
@@ -194,6 +287,24 @@ export type Add<
     ? _ToIntOrNaN<_Add<ADigits, BDigits>>
     : NaN
   : NaN;
+
+type _Add<
+  A extends string,
+  B extends string,
+  Carry extends string = "0"
+> = A extends `${infer ADigit}${infer ARest}`
+  ? B extends `${infer BDigit}${infer BRest}`
+    ? `${_Xor<_Xor<ADigit, BDigit>, Carry>}${_Add<
+        ARest,
+        BRest,
+        _Or<_And<_Xor<ADigit, BDigit>, Carry>, _And<ADigit, BDigit>>
+      >}`
+    : _Add<A, _MapChar<A, "0">, Carry>
+  : B extends `${infer _BDigit}${infer _BRest}`
+  ? _Add<_MapChar<B, "0">, B, Carry>
+  : Carry extends "1"
+  ? "1"
+  : "";
 
 /**
  * Returns `N+1`.
@@ -228,6 +339,31 @@ export type Subtract<
     : NaN
   : NaN;
 
+type _Subtract<
+  A extends string,
+  B extends string,
+  Carry extends string = "0",
+  Result extends string = ""
+> = A extends `${infer ADigit}${infer ARest}`
+  ? B extends `${infer BDigit}${infer BRest}`
+    ? _Subtract<
+        ARest,
+        BRest,
+        _Or<_And<_Not<ADigit>, _Xor<BDigit, Carry>>, _And<BDigit, Carry>>,
+        `${Result}${_Xor<_Xor<ADigit, BDigit>, Carry>}`
+      >
+    : Carry extends "1"
+    ? _Subtract<
+        ARest,
+        B,
+        _Xor<ADigit, Carry>,
+        `${Result}${_Xor<ADigit, Carry>}`
+      >
+    : `${Result}${A}`
+  : B extends `${infer _BDigit}${infer _BRest}`
+  ? NaN
+  : Result;
+
 /**
  * Returns `N-1`.
  *
@@ -255,6 +391,14 @@ export type Multiply<
     : NaN
   : NaN;
 
+type _Multiply<
+  A extends string,
+  B extends string,
+  Result extends string = ""
+> = B extends `${infer BDigit}${infer BRest}`
+  ? _Multiply<`0${A}`, BRest, BDigit extends "1" ? _Add<Result, A> : Result>
+  : Result;
+
 /**
  * Returns both the `quotient` and `remainder` when dividing `Dividend` by
  * `Divisor`.
@@ -277,6 +421,38 @@ export type DivMod<
     ? _DivMod<ADigits, BDigits>
     : { quotient: NaN; remainder: NaN }
   : { quotient: NaN; remainder: NaN };
+
+type _DivMod<
+  A extends string,
+  B extends string,
+  P extends string = "1",
+  B2 extends string = `0${B}`,
+  P2 extends string = `0${P}`
+> = (B extends A ? true : _IsLessThan<B, A>) extends true
+  ? _DivMod<A, B2, P2>
+  : _DivMod2<A, B2, P2>;
+type _DivMod2<
+  A extends string,
+  B extends string,
+  P extends string,
+  Q extends string = ""
+> = P extends `0${infer PRest}`
+  ? B extends `0${infer BRest}`
+    ? (BRest extends A ? true : _IsLessThan<BRest, A>) extends true
+      ? _DivMod2<
+          _StripTrailingZeroes<_Subtract<A, BRest>>,
+          BRest,
+          PRest,
+          `1${Q}`
+        >
+      : _DivMod2<A, BRest, PRest, `0${Q}`>
+    : { quotient: NaN; remainder: NaN }
+  : { quotient: _ToIntOrNaN<Q>; remainder: _ToIntOrNaN<A> };
+
+interface _DivModResult {
+  quotient: Number;
+  remainder: Number;
+}
 
 /**
  * Divides `Dividend` by `Divisor` and returns the result rounded down.
@@ -319,6 +495,17 @@ export type FromBase<
   Base extends Number
 > = Base extends Integer ? _FromBase<String.Reverse<N>, Base, "0b1"> : NaN;
 
+type _FromBase<
+  Num extends string,
+  Base extends Integer,
+  Power extends Integer
+> = Num extends `${infer Digit}${infer Rest}`
+  ? Add<
+      Multiply<_FromDigit<Digit>, Power>,
+      _FromBase<Rest, Base, Multiply<Power, Base>>
+    >
+  : "0b";
+
 /**
  * Converts an integer to a string in the specified base. Letter digits
  * will be capitalized.
@@ -335,6 +522,19 @@ export type ToBase<N extends Number, Base extends Number> = N extends Integer
     : NaN
   : NaN;
 
+type _ToBase<
+  N extends Integer,
+  Base extends Integer,
+  Result extends _DivModResult = DivMod<N, Base>,
+  Digit extends string = _ToDigit<Result["remainder"]>
+> = N extends Zero
+  ? ""
+  : // @ts-expect-error - excessively deep in v4.6
+    `${_ToBase<
+      Result["quotient"] extends Integer ? Result["quotient"] : Zero,
+      Base
+    >}${Digit}`;
+
 /**
  * Converts a base-10 string or number into an {@link Integer}.
  *
@@ -350,197 +550,6 @@ export type FromDecimal<N extends string | number> = FromBase<`${N}`, _Ten>;
  *     type R = Integer.ToDecimal<"0b011">; // => "6"
  */
 export type ToDecimal<N extends Number> = ToBase<N, _Ten>;
-
-/** Any base-10 digit character. */
-export type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
-
-type _Ten = "0b0101";
-
-type _IsLessThan<
-  A extends string,
-  B extends string,
-  IsLesser = false
-> = A extends `${infer ADigit}${infer ARest}`
-  ? B extends `${infer BDigit}${infer BRest}`
-    ? _IsLessThan<
-        ARest,
-        BRest,
-        ADigit extends BDigit ? IsLesser : ADigit extends "1" ? false : true
-      >
-    : false
-  : B extends `${infer _BDigit}${infer _BRest}`
-  ? true
-  : IsLesser;
-
-type _MapChar<
-  S extends string,
-  NewChar extends string
-> = S extends `${infer _Char}${infer Rest}`
-  ? `${NewChar}${_MapChar<Rest, NewChar>}`
-  : "";
-
-type _ToIntOrNaN<DigitsOrNaN extends string> = DigitsOrNaN extends NaN
-  ? DigitsOrNaN
-  : `0b${_StripTrailingZeroes<DigitsOrNaN>}`;
-
-type _StripTrailingZeroes<Digits extends string> =
-  Digits extends `${infer Rest}0` ? _StripTrailingZeroes<Rest> : Digits;
-
-type _Not<Digits extends string> = Digits extends `${infer Digit}${infer Rest}`
-  ? `${Digit extends "1" ? 0 : 1}${_Not<Rest>}`
-  : "";
-
-type _And<
-  A extends string,
-  B extends string
-> = A extends `${infer ADigit}${infer ARest}`
-  ? B extends `${infer BDigit}${infer BRest}`
-    ? `${`${ADigit}${BDigit}` extends "11" ? 1 : 0}${_And<ARest, BRest>}`
-    : _MapChar<A, "0">
-  : _MapChar<B, "0">;
-
-type _Nand<
-  A extends string,
-  B extends string
-> = A extends `${infer ADigit}${infer ARest}`
-  ? B extends `${infer BDigit}${infer BRest}`
-    ? `${`${ADigit}${BDigit}` extends "11" ? 0 : 1}${_Nand<ARest, BRest>}`
-    : _MapChar<A, "1">
-  : _MapChar<B, "1">;
-
-type _Or<
-  A extends string,
-  B extends string
-> = A extends `${infer ADigit}${infer ARest}`
-  ? B extends `${infer BDigit}${infer BRest}`
-    ? `${ADigit extends "1" ? 1 : BDigit extends "1" ? 1 : 0}${_Or<
-        ARest,
-        BRest
-      >}`
-    : A
-  : B;
-
-type _Xor<
-  A extends string,
-  B extends string
-> = A extends `${infer ADigit}${infer ARest}`
-  ? B extends `${infer BDigit}${infer BRest}`
-    ? `${ADigit extends BDigit ? 0 : 1}${_Xor<ARest, BRest>}`
-    : A
-  : B;
-
-type _ShiftLeft<Digits extends string, X extends Number> = IsLessThanOrEqual<
-  X,
-  Zero
-> extends true
-  ? Digits
-  : _ShiftLeft<`0${Digits}`, Decrement<X>>;
-
-type _Add<
-  A extends string,
-  B extends string,
-  Carry extends string = "0"
-> = A extends `${infer ADigit}${infer ARest}`
-  ? B extends `${infer BDigit}${infer BRest}`
-    ? `${_Xor<_Xor<ADigit, BDigit>, Carry>}${_Add<
-        ARest,
-        BRest,
-        _Or<_And<_Xor<ADigit, BDigit>, Carry>, _And<ADigit, BDigit>>
-      >}`
-    : _Add<A, _MapChar<A, "0">, Carry>
-  : B extends `${infer _BDigit}${infer _BRest}`
-  ? _Add<_MapChar<B, "0">, B, Carry>
-  : Carry extends "1"
-  ? "1"
-  : "";
-
-type _Subtract<
-  A extends string,
-  B extends string,
-  Carry extends string = "0",
-  Result extends string = ""
-> = A extends `${infer ADigit}${infer ARest}`
-  ? B extends `${infer BDigit}${infer BRest}`
-    ? _Subtract<
-        ARest,
-        BRest,
-        _Or<_And<_Not<ADigit>, _Xor<BDigit, Carry>>, _And<BDigit, Carry>>,
-        `${Result}${_Xor<_Xor<ADigit, BDigit>, Carry>}`
-      >
-    : Carry extends "1"
-    ? _Subtract<
-        ARest,
-        B,
-        _Xor<ADigit, Carry>,
-        `${Result}${_Xor<ADigit, Carry>}`
-      >
-    : `${Result}${A}`
-  : B extends `${infer _BDigit}${infer _BRest}`
-  ? NaN
-  : Result;
-
-type _Multiply<
-  A extends string,
-  B extends string,
-  Result extends string = ""
-> = B extends `${infer BDigit}${infer BRest}`
-  ? _Multiply<`0${A}`, BRest, BDigit extends "1" ? _Add<Result, A> : Result>
-  : Result;
-
-type _DivMod<
-  A extends string,
-  B extends string,
-  P extends string = "1",
-  B2 extends string = `0${B}`,
-  P2 extends string = `0${P}`
-> = (B extends A ? true : _IsLessThan<B, A>) extends true
-  ? _DivMod<A, B2, P2>
-  : _DivMod2<A, B2, P2>;
-type _DivMod2<
-  A extends string,
-  B extends string,
-  P extends string,
-  Q extends string = ""
-> = P extends `0${infer PRest}`
-  ? B extends `0${infer BRest}`
-    ? (BRest extends A ? true : _IsLessThan<BRest, A>) extends true
-      ? _DivMod2<
-          _StripTrailingZeroes<_Subtract<A, BRest>>,
-          BRest,
-          PRest,
-          `1${Q}`
-        >
-      : _DivMod2<A, BRest, PRest, `0${Q}`>
-    : { quotient: NaN; remainder: NaN }
-  : { quotient: _ToIntOrNaN<Q>; remainder: _ToIntOrNaN<A> };
-interface _DivModResult {
-  quotient: Number;
-  remainder: Number;
-}
-
-type _FromBase<
-  Num extends string,
-  Base extends Integer,
-  Power extends Integer
-> = Num extends `${infer Digit}${infer Rest}`
-  ? Add<
-      Multiply<_FromDigit<Digit>, Power>,
-      _FromBase<Rest, Base, Multiply<Power, Base>>
-    >
-  : "0b";
-
-type _ToBase<
-  N extends Integer,
-  Base extends Integer,
-  Result extends _DivModResult = DivMod<N, Base>,
-  Digit extends string = _ToDigit<Result["remainder"]>
-> = N extends Zero
-  ? ""
-  : // @ts-expect-error - excessively deep in v4.6
-    `${_ToBase<
-      Result["quotient"] extends Integer ? Result["quotient"] : Zero,
-      Base
-    >}${Digit}`;
 
 // Generated with:
 // a=[];for(i=0;i<36;i++)a.push(`"${i.toString(36).toUpperCase()}": "0b${[...i.toString(2)].reverse().join('')}",`);console.log(a.join('\n'))

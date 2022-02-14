@@ -2,6 +2,9 @@ import * as Integer from "../primitives/integer";
 
 export {};
 
+type _Three = Integer.FromDecimal<3>;
+type _Five = Integer.FromDecimal<5>;
+
 /**
  * Solves the classic [fuzz buzz](https://wikipedia.org/wiki/Fizz_buzz)
  * exercise. Returns a list of numbers and the words "fizz" and/or "buzz".
@@ -28,5 +31,3 @@ type _FizzBuzz<
       ..._FizzBuzz<UpTo, Integer.Increment<N>>
     ]
   : [];
-type _Three = Integer.FromDecimal<3>;
-type _Five = Integer.FromDecimal<5>;

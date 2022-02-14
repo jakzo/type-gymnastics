@@ -2,6 +2,10 @@ import * as Integer from "../primitives/integer";
 
 export {};
 
+type Operators = Operators1 | Operators2;
+type Operators1 = "+" | "-";
+type Operators2 = "*" | "/" | "%";
+
 /**
  * Evaluates a mathematical equation. Allowed operators are add (`+`),
  * subtract (`-`), multiply (`*`), divide (`/`) and modulo (`%`).
@@ -14,10 +18,6 @@ export {};
  *     type R = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">; // => "45"
  */
 export type Evaluate<Expression extends string> = _Eval<Expression>;
-
-type Operators = Operators1 | Operators2;
-type Operators1 = "+" | "-";
-type Operators2 = "*" | "/" | "%";
 
 type _Eval<
   Expr extends string,
@@ -68,6 +68,7 @@ type _Eval<
     ? Integer.ToDecimal<N>
     : Integer.NaN
   : Integer.NaN;
+
 type _ApplyOpFromStack<
   Op,
   Expr extends string,
@@ -87,6 +88,7 @@ type _ApplyOpFromStack<
       OperatorStack extends string[] ? OperatorStack : []
     >
   : Integer.NaN;
+
 type _IsGreaterOrEqualPrecedence<
   A extends string,
   B extends string
@@ -99,6 +101,7 @@ type _IsGreaterOrEqualPrecedence<
       : false
     : false
   : false;
+
 type _ApplyOp<
   Op extends Operators,
   A extends string,

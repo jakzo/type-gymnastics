@@ -3,6 +3,8 @@ import * as Integer from "../primitives/integer";
 
 export {};
 
+type _Queen = [Integer.Number, Integer.Number];
+
 /**
  * Solves the classical [n queens](https://wikipedia.org/wiki/Eight_queens_puzzle)
  * problem and returns a list of `[x, y]` pairs of 0-indexed coordinates where
@@ -18,28 +20,6 @@ export type NQueens<
   ToPlace extends Integer.Number = Integer.FromDecimal<8>,
   GridSize extends Integer.Number = Integer.FromDecimal<8>
 > = _NQueens<ToPlace, GridSize>;
-
-/**
- * Returns a visual representation of a result from {@link NQueens}. This string is
- * designed to be viewed in the IntelliSense tooltip that appears when hovering
- * the mouse over a type, and may not appear correctly in other locations.
- *
- * @example
- *     type R = Problems.NQueensVisualized<
- *       Problems.NQueens<Integer.FromDecimal<4>, Integer.FromDecimal<4>>,
- *       Integer.FromDecimal<4>
- *     >; // => "
- *     // ◻️ ♕ ◻️ ◼️
- *     // ◼️ ◻️ ◼️ ♕
- *     // ♕ ◼️ ◻️ ◼️
- *     // ◼️ ◻️ ♕ ◻️"
- */
-export type NQueensVisualized<
-  Queens extends _Queen[] = NQueens,
-  GridSize extends Integer.Number = Integer.FromDecimal<8>
-> = _NQueensVisualized<Queens, GridSize>;
-
-type _Queen = [Integer.Number, Integer.Number];
 
 type _NQueens<
   ToPlace extends Integer.Number,
@@ -106,6 +86,26 @@ type _IsThreatened<
     : false
   : false;
 
+/**
+ * Returns a visual representation of a result from {@link NQueens}. This string is
+ * designed to be viewed in the IntelliSense tooltip that appears when hovering
+ * the mouse over a type, and may not appear correctly in other locations.
+ *
+ * @example
+ *     type R = Problems.NQueensVisualized<
+ *       Problems.NQueens<Integer.FromDecimal<4>, Integer.FromDecimal<4>>,
+ *       Integer.FromDecimal<4>
+ *     >; // => "
+ *     // ◻️ ♕ ◻️ ◼️
+ *     // ◼️ ◻️ ◼️ ♕
+ *     // ♕ ◼️ ◻️ ◼️
+ *     // ◼️ ◻️ ♕ ◻️"
+ */
+export type NQueensVisualized<
+  Queens extends _Queen[] = NQueens,
+  GridSize extends Integer.Number = Integer.FromDecimal<8>
+> = _NQueensVisualized<Queens, GridSize>;
+
 type _NQueensVisualized<
   Queens extends _Queen[],
   GridSize extends Integer.Number,
@@ -117,6 +117,7 @@ type _NQueensVisualized<
       GridSize,
       Y
     >}${_NQueensVisualized<Queens, GridSize, Integer.Increment<Y>>}`;
+
 type _NQueensVisualizedRow<
   Queens extends _Queen[],
   GridSize extends Integer.Number,
@@ -137,6 +138,7 @@ type _NQueensVisualizedRow<
       Y,
       Integer.Increment<X>
     >}`;
+
 type _IsQueenAt<
   Queens extends _Queen[],
   X extends Integer.Number,
