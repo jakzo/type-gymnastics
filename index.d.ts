@@ -1,4 +1,4 @@
 // Minimum TypeScript Version: 4.6
-export * from "./primitives/integer";
-export * from "./primitives/string";
+export type { Integer } from "./primitives/integer";
+export type { String } from "./primitives/string";
 export type { Math } from "./math/evaluate";

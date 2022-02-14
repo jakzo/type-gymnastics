@@ -1,7 +1,6 @@
 {
   "extends": "@definitelytyped/dtslint/dtslint.json",
   "rules": {
-    "jsdoc-format": false,
     "ban-types": false
   }
 }

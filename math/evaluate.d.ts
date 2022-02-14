@@ -4,13 +4,17 @@ export {};
 
 /** Math utilities. */
 export namespace Math {
-  /** Evaluates a mathematical equation. Allowed operators are add (+), subtract
-   * (-), multiply (*), divide (/) and modulo (%). Parentheses are also allowed.
+  /**
+   * Evaluates a mathematical equation. Allowed operators are add (`+`),
+   * subtract (`-`), multiply (`*`), divide (`/`) and modulo (`%`).
+   * Parentheses and whitespace are also allowed.
    *
    * Note that negative integers are not yet supported so if an intermediate
    * step ever evaluates to a negative number the result will be `NaN`.
    *
-   * @example type R = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">; // => "45" */
+   * @example
+   *     type R = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">; // => "45"
+   */
   type Evaluate<Expression extends string> = _Eval<Expression>;
 }
 
