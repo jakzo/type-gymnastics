@@ -19,10 +19,13 @@ type Result = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">;
 // The type of `Result` is: "45"
 const b: Result = "45";
 
-type NumQueensToPlace
-type GridSize=8
+type NumQueensToPlace = 8;
+type GridSize = 8;
 type Board = Problems.NQueensVisualized<
-  Problems.NQueens<Integer.FromDecimal<NumQueensToPlace>, Integer.FromDecimal<GridSize>>,
+  Problems.NQueens<
+    Integer.FromDecimal<NumQueensToPlace>,
+    Integer.FromDecimal<GridSize>
+  >,
   Integer.FromDecimal<GridSize>
 >;
 // The type of `Board` is: "
