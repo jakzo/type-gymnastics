@@ -2,12 +2,15 @@ import { Integer } from "../primitives/integer";
 
 export {};
 
+/** Math utilities. */
 export namespace Math {
   /** Evaluates a mathematical equation. Allowed operators are add (+), subtract
    * (-), multiply (*), divide (/) and modulo (%). Parentheses are also allowed.
    *
    * Note that negative integers are not yet supported so if an intermediate
-   * step ever evaluates to a negative number the result will be `NaN`. */
+   * step ever evaluates to a negative number the result will be `NaN`.
+   *
+   * @example type R = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">; // => "45" */
   type Evaluate<Expression extends string> = _Eval<Expression>;
 }
 
