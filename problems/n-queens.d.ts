@@ -1,44 +1,43 @@
-import { Array } from "primitives/array";
-import { String } from "primitives/string";
-import { Integer } from "../primitives/integer";
+import * as String from "../primitives/string";
+import * as Integer from "../primitives/integer";
 
 export {};
 
-export namespace Problems {
-  /**
-   * Solves the classical [n queens](https://en.wikipedia.org/wiki/Eight_queens_puzzle) problem.
-   *
-   * See {@link NQueensVisualized} to get a more human-friendly output.
-   *
-   * @example
-   *     type R = Problems.NQueens<Integer.FromDecimal<8>, Integer.FromDecimal<8>>;
-   *     // => [["0b11", "0b111"], ["0b1", "0b011"], ["0b011", "0b101"], ["0b01", "0b001"], ["0b101", "0b11"], ["0b111", "0b01"], ["0b001", "0b1"], ["0b", "0b"]]
-   */
-  type NQueens<
-    ToPlace extends Integer.Number = Integer.FromDecimal<8>,
-    GridSize extends Integer.Number = Integer.FromDecimal<8>
-  > = _NQueens<ToPlace, GridSize>;
+/**
+ * Solves the classical [n queens](https://wikipedia.org/wiki/Eight_queens_puzzle)
+ * problem and returns a list of `[x, y]` pairs of 0-indexed coordinates where
+ * the queens should be placed, or `undefined` if there is no solution.
+ *
+ * See {@link NQueensVisualized} to get a more human-friendly output.
+ *
+ * @example
+ *     type R = Problems.NQueens<Integer.FromDecimal<8>, Integer.FromDecimal<8>>;
+ *     // => [["0b11", "0b111"], ["0b1", "0b011"], ["0b011", "0b101"], ["0b01", "0b001"], ["0b101", "0b11"], ["0b111", "0b01"], ["0b001", "0b1"], ["0b", "0b"]]
+ */
+export type NQueens<
+  ToPlace extends Integer.Number = Integer.FromDecimal<8>,
+  GridSize extends Integer.Number = Integer.FromDecimal<8>
+> = _NQueens<ToPlace, GridSize>;
 
-  /**
-   * Returns a visual representation of a result from {@link NQueens}. This string is
-   * designed to be viewed in the IntelliSense tooltip that appears when hovering
-   * the mouse over a type, and may not appear correctly in other locations.
-   *
-   * @example
-   *     type R = Problems.NQueensVisualized<
-   *       Problems.NQueens<Integer.FromDecimal<4>, Integer.FromDecimal<4>>,
-   *       Integer.FromDecimal<4>
-   *     >; // => "
-   *     // ◻️ ♕ ◻️ ◼️
-   *     // ◼️ ◻️ ◼️ ♕
-   *     // ♕ ◼️ ◻️ ◼️
-   *     // ◼️ ◻️ ♕ ◻️"
-   */
-  type NQueensVisualized<
-    Queens extends _Queen[] = NQueens,
-    GridSize extends Integer.Number = Integer.FromDecimal<8>
-  > = _NQueensVisualized<Queens, GridSize>;
-}
+/**
+ * Returns a visual representation of a result from {@link NQueens}. This string is
+ * designed to be viewed in the IntelliSense tooltip that appears when hovering
+ * the mouse over a type, and may not appear correctly in other locations.
+ *
+ * @example
+ *     type R = Problems.NQueensVisualized<
+ *       Problems.NQueens<Integer.FromDecimal<4>, Integer.FromDecimal<4>>,
+ *       Integer.FromDecimal<4>
+ *     >; // => "
+ *     // ◻️ ♕ ◻️ ◼️
+ *     // ◼️ ◻️ ◼️ ♕
+ *     // ♕ ◼️ ◻️ ◼️
+ *     // ◼️ ◻️ ♕ ◻️"
+ */
+export type NQueensVisualized<
+  Queens extends _Queen[] = NQueens,
+  GridSize extends Integer.Number = Integer.FromDecimal<8>
+> = _NQueensVisualized<Queens, GridSize>;
 
 type _Queen = [Integer.Number, Integer.Number];
 

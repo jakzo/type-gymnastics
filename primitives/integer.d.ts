@@ -1,345 +1,360 @@
-import { String } from "./string";
-
-export {};
-
 /**
+ * @fileoverview
  * A binary big-integer implementation. These are strings of the format `"0b${1 | 0}..."`.
  * Each character is a bit. Due to TypeScript recursion limitations, you may encounter
  * issues using integers larger than 32 bits in size.
  */
-export namespace Integer {
-  /**
-   * A binary integer, including {@link NaN}. It is in **big endian** format (most
-   * significant bit comes last, not like the JS binary notation and most other
-   * representitations where it comes first).
-   *
-   * @example
-   *     const n: Integer.Number = "0b01101"; // 22 in decimal
-   */
-  type Number = Integer | NaN;
-  /**
-   * A concrete integer (not {@link NaN}).
-   *
-   * @example
-   *     const n: Integer.Number = "0b01101"; // 22 in decimal
-   */
-  type Integer = `0b${string}`;
-  /**
-   * Not-a-number. When an operation that returns a number is not defined (eg.
-   * dividing by zero) it will return this.
-   */
-  type NaN = `NaN`;
-  /** The number 0 as an {@link Integer}. */
-  type Zero = "0b";
-  /** The number 1 as an {@link Integer}. */
-  type One = "0b1";
 
-  /**
-   * Returns `true` if `A` is less than `B`, else `false`.
-   *
-   * @example
-   *     type R = Integer.IsLessThan<FromDecimal<5>, FromDecimal<6>>; // => true
-   *     type R = Integer.IsLessThan<FromDecimal<7>, FromDecimal<6>>; // => false
-   *     type R = Integer.IsLessThan<FromDecimal<6>, FromDecimal<6>>; // => false
-   */
-  type IsLessThan<A extends Number, B extends Number> = A extends B
-    ? false
-    : A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _IsLessThan<ADigits, BDigits>
-      : false
-    : false;
+import * as String from "./string";
 
-  /**
-   * Returns `true` if `A` is less than or equal to `B`, else `false`.
-   *
-   * @example
-   *     type R = Integer.IsLessThanOrEqual<FromDecimal<5>, FromDecimal<6>>; // => true
-   *     type R = Integer.IsLessThanOrEqual<FromDecimal<7>, FromDecimal<6>>; // => false
-   *     type R = Integer.IsLessThanOrEqual<FromDecimal<6>, FromDecimal<6>>; // => true
-   */
-  type IsLessThanOrEqual<A extends Number, B extends Number> = A extends B
-    ? true
-    : IsLessThan<A, B>;
+export {};
 
-  /**
-   * Returns `true` if `A` is greater than `B`, else `false`.
-   *
-   * @example
-   *     type R = Integer.IsGreaterThan<FromDecimal<5>, FromDecimal<6>>; // => false
-   *     type R = Integer.IsGreaterThan<FromDecimal<7>, FromDecimal<6>>; // => true
-   *     type R = Integer.IsGreaterThan<FromDecimal<6>, FromDecimal<6>>; // => false
-   */
-  type IsGreaterThan<A extends Number, B extends Number> = A extends B
-    ? false
-    : IsLessThan<A, B> extends true
-    ? false
-    : true;
+/**
+ * A binary integer, including {@link NaN}. It is in **big endian** format (most
+ * significant bit comes last, not like the JS binary notation and most other
+ * representitations where it comes first).
+ *
+ * @example
+ *     const n: Integer.Number = "0b01101"; // 22 in decimal
+ */
+export type Number = Integer | NaN;
+/**
+ * A concrete integer (not {@link NaN}).
+ *
+ * @example
+ *     const n: Integer.Number = "0b01101"; // 22 in decimal
+ */
+export type Integer = `0b${string}`;
+/**
+ * Not-a-number. When an operation that returns a number is not defined (eg.
+ * dividing by zero) it will return this.
+ */
+export type NaN = `NaN`;
+/** The number 0 as an {@link Integer}. */
+export type Zero = "0b";
+/** The number 1 as an {@link Integer}. */
+export type One = "0b1";
 
-  /**
-   * Returns `true` if `A` is greater than or equal to `B`, else `false`.
-   *
-   * @example
-   *     type R = Integer.IsGreaterThanOrEqual<FromDecimal<5>, FromDecimal<6>>; // => false
-   *     type R = Integer.IsGreaterThanOrEqual<FromDecimal<7>, FromDecimal<6>>; // => true
-   *     type R = Integer.IsGreaterThanOrEqual<FromDecimal<6>, FromDecimal<6>>; // => true
-   */
-  type IsGreaterThanOrEqual<A extends Number, B extends Number> = A extends B
-    ? true
-    : IsLessThan<A, B> extends true
-    ? false
-    : true;
+/**
+ * Returns `true` if `A` is less than `B`, else `false`.
+ *
+ * @example
+ *     type R = Integer.IsLessThan<FromDecimal<5>, FromDecimal<6>>; // => true
+ *     type R = Integer.IsLessThan<FromDecimal<7>, FromDecimal<6>>; // => false
+ *     type R = Integer.IsLessThan<FromDecimal<6>, FromDecimal<6>>; // => false
+ */
+export type IsLessThan<A extends Number, B extends Number> = A extends B
+  ? false
+  : A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _IsLessThan<ADigits, BDigits>
+    : false
+  : false;
 
-  /**
-   * Returns bitwise NOT of `N` (all bits flipped).
-   *
-   * Note that this **does not** return one or two's complement (ie. `-N-1`)
-   * like most other languages because negative numbers are not yet supported.
-   * This means that applying `Not` twice will not produce the original number.
-   *
-   * @example
-   *     type R = Integer.Not<"0b01101">; // => "0b1001"
-   */
-  type Not<N extends Number> = N extends `0b${infer Digits}`
-    ? _ToIntOrNaN<_Not<Digits>>
-    : NaN;
+/**
+ * Returns `true` if `A` is less than or equal to `B`, else `false`.
+ *
+ * @example
+ *     type R = Integer.IsLessThanOrEqual<FromDecimal<5>, FromDecimal<6>>; // => true
+ *     type R = Integer.IsLessThanOrEqual<FromDecimal<7>, FromDecimal<6>>; // => false
+ *     type R = Integer.IsLessThanOrEqual<FromDecimal<6>, FromDecimal<6>>; // => true
+ */
+export type IsLessThanOrEqual<A extends Number, B extends Number> = A extends B
+  ? true
+  : IsLessThan<A, B>;
 
-  /**
-   * Returns bitwise AND of `A` and `B`.
-   *
-   * @example
-   *     type R = Integer.And<"0b01101", "0b11001">; // => "0b01001"
-   */
-  type And<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _ToIntOrNaN<_And<ADigits, BDigits>>
-      : NaN
-    : NaN;
+/**
+ * Returns `true` if `A` is greater than `B`, else `false`.
+ *
+ * @example
+ *     type R = Integer.IsGreaterThan<FromDecimal<5>, FromDecimal<6>>; // => false
+ *     type R = Integer.IsGreaterThan<FromDecimal<7>, FromDecimal<6>>; // => true
+ *     type R = Integer.IsGreaterThan<FromDecimal<6>, FromDecimal<6>>; // => false
+ */
+export type IsGreaterThan<A extends Number, B extends Number> = A extends B
+  ? false
+  : IsLessThan<A, B> extends true
+  ? false
+  : true;
 
-  /**
-   * Returns bitwise NAND (1 if `A` and `B` are not both 1) of `A` and `B`.
-   *
-   * @example
-   *     type R = Integer.Nand<"0b01101", "0b11001">; // => "0b1011"
-   */
-  type Nand<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _ToIntOrNaN<_Nand<ADigits, BDigits>>
-      : NaN
-    : NaN;
+/**
+ * Returns `true` if `A` is greater than or equal to `B`, else `false`.
+ *
+ * @example
+ *     type R = Integer.IsGreaterThanOrEqual<FromDecimal<5>, FromDecimal<6>>; // => false
+ *     type R = Integer.IsGreaterThanOrEqual<FromDecimal<7>, FromDecimal<6>>; // => true
+ *     type R = Integer.IsGreaterThanOrEqual<FromDecimal<6>, FromDecimal<6>>; // => true
+ */
+export type IsGreaterThanOrEqual<
+  A extends Number,
+  B extends Number
+> = A extends B ? true : IsLessThan<A, B> extends true ? false : true;
 
-  /**
-   * Returns bitwise OR of `A` and `B`.
-   *
-   * @example
-   *     type R = Integer.Or<"0b01101", "0b11001">; // => "0b11101"
-   */
-  type Or<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _ToIntOrNaN<_Or<ADigits, BDigits>>
-      : NaN
-    : NaN;
+/**
+ * Returns bitwise NOT of `N` (all bits flipped).
+ *
+ * Note that this **does not** return one or two's complement (ie. `-N-1`)
+ * like most other languages because negative numbers are not yet supported.
+ * This means that applying `Not` twice will not produce the original number.
+ *
+ * @example
+ *     type R = Integer.Not<"0b01101">; // => "0b1001"
+ */
+export type Not<N extends Number> = N extends `0b${infer Digits}`
+  ? _ToIntOrNaN<_Not<Digits>>
+  : NaN;
 
-  /**
-   * Returns bitwise XOR of `A` and `B`.
-   *
-   * @example
-   *     type R = Integer.Xor<"0b01101", "0b11001">; // => "0b01001"
-   */
-  type Xor<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _ToIntOrNaN<_Xor<ADigits, BDigits>>
-      : NaN
-    : NaN;
+/**
+ * Returns bitwise AND of `A` and `B`.
+ *
+ * @example
+ *     type R = Integer.And<"0b01101", "0b11001">; // => "0b01001"
+ */
+export type And<
+  A extends Number,
+  B extends Number
+> = A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _ToIntOrNaN<_And<ADigits, BDigits>>
+    : NaN
+  : NaN;
 
-  /**
-   * Returns `N` bitwise shifted `X` times to the left.
-   *
-   * Note that despite integers being notated in big endian, this is named as
-   * if they are in little endian, meaning it makes numbers larger.
-   *
-   * @example
-   *     type R = Integer.ShiftLeft<"0b1101", Integer.FromDecimal<2>>; // => "0b001001"
-   */
-  type ShiftLeft<
-    N extends Number,
-    X extends Number
-  > = N extends `0b${infer Digits}` ? _ShiftLeft<Digits, X> : NaN;
+/**
+ * Returns bitwise NAND (1 if `A` and `B` are not both 1) of `A` and `B`.
+ *
+ * @example
+ *     type R = Integer.Nand<"0b01101", "0b11001">; // => "0b1011"
+ */
+export type Nand<
+  A extends Number,
+  B extends Number
+> = A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _ToIntOrNaN<_Nand<ADigits, BDigits>>
+    : NaN
+  : NaN;
 
-  /**
-   * Returns the sum of `A` and `B`.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.Add<Integer.FromDecimal<23>, Integer.FromDecimal<45>>
-   *     >; // => "68"
-   */
-  type Add<A extends Number, B extends Number> = A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _ToIntOrNaN<_Add<ADigits, BDigits>>
-      : NaN
-    : NaN;
+/**
+ * Returns bitwise OR of `A` and `B`.
+ *
+ * @example
+ *     type R = Integer.Or<"0b01101", "0b11001">; // => "0b11101"
+ */
+export type Or<
+  A extends Number,
+  B extends Number
+> = A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _ToIntOrNaN<_Or<ADigits, BDigits>>
+    : NaN
+  : NaN;
 
-  /**
-   * Returns `N+1`.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.Increment<Integer.FromDecimal<5>>
-   *     >; // => "6"
-   */
-  type Increment<N extends Number> = Add<N, One>;
+/**
+ * Returns bitwise XOR of `A` and `B`.
+ *
+ * @example
+ *     type R = Integer.Xor<"0b01101", "0b11001">; // => "0b01001"
+ */
+export type Xor<
+  A extends Number,
+  B extends Number
+> = A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _ToIntOrNaN<_Xor<ADigits, BDigits>>
+    : NaN
+  : NaN;
 
-  /**
-   * Returns `A-B`.
-   *
-   * Note that negative integers are not yet supported so if the result would be
-   * negative it returns {@link NaN} instead.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.Subtract<Integer.FromDecimal<45>, Integer.FromDecimal<23>>
-   *     >; // => "22"
-   *     type R = Integer.ToDecimal<
-   *       Integer.Subtract<Integer.FromDecimal<2>, Integer.FromDecimal<3>>
-   *     >; // => "NaN"
-   */
-  type Subtract<
-    A extends Number,
-    B extends Number
-  > = A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _ToIntOrNaN<_Subtract<ADigits, BDigits>>
-      : NaN
-    : NaN;
+/**
+ * Returns `N` bitwise shifted `X` times to the left.
+ *
+ * Note that despite integers being notated in big endian, this is named as
+ * if they are in little endian, meaning it makes numbers larger.
+ *
+ * @example
+ *     type R = Integer.ShiftLeft<"0b1101", Integer.FromDecimal<2>>; // => "0b001001"
+ */
+export type ShiftLeft<
+  N extends Number,
+  X extends Number
+> = N extends `0b${infer Digits}` ? _ShiftLeft<Digits, X> : NaN;
 
-  /**
-   * Returns `N-1`.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.Decrement<Integer.FromDecimal<5>>
-   *     >; // => "4"
-   */
-  type Decrement<N extends Number> = Subtract<N, One>;
+/**
+ * Returns the sum of `A` and `B`.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.Add<Integer.FromDecimal<23>, Integer.FromDecimal<45>>
+ *     >; // => "68"
+ */
+export type Add<
+  A extends Number,
+  B extends Number
+> = A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _ToIntOrNaN<_Add<ADigits, BDigits>>
+    : NaN
+  : NaN;
 
-  /**
-   * Returns the product of `A` and `B`.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.Multiply<Integer.FromDecimal<3>, Integer.FromDecimal<7>>
-   *     >; // => "21"
-   */
-  type Multiply<
-    A extends Number,
-    B extends Number
-  > = A extends `0b${infer ADigits}`
-    ? B extends `0b${infer BDigits}`
-      ? _ToIntOrNaN<_Multiply<ADigits, BDigits>>
-      : NaN
-    : NaN;
+/**
+ * Returns `N+1`.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.Increment<Integer.FromDecimal<5>>
+ *     >; // => "6"
+ */
+export type Increment<N extends Number> = Add<N, One>;
 
-  /**
-   * Returns both the `quotient` and `remainder` when dividing `Dividend` by
-   * `Divisor`.
-   *
-   * The division algorithm returns both of these, so prefer this method
-   * over {@link Divide} and {@link Modulo} if you need both for efficiency.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.DivMod<Integer.FromDecimal<14>, Integer.FromDecimal<3>>
-   *     >; // => { quotient: "4"; remainder: "2" }
-   */
-  type DivMod<
-    Dividend extends Number,
-    Divisor extends Number
-  > = Divisor extends Zero
-    ? { quotient: NaN; remainder: NaN }
-    : Dividend extends `0b${infer ADigits}`
-    ? Divisor extends `0b${infer BDigits}`
-      ? _DivMod<ADigits, BDigits>
-      : { quotient: NaN; remainder: NaN }
-    : { quotient: NaN; remainder: NaN };
+/**
+ * Returns `A-B`.
+ *
+ * Note that negative integers are not yet supported so if the result would be
+ * negative it returns {@link NaN} instead.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.Subtract<Integer.FromDecimal<45>, Integer.FromDecimal<23>>
+ *     >; // => "22"
+ *     type R = Integer.ToDecimal<
+ *       Integer.Subtract<Integer.FromDecimal<2>, Integer.FromDecimal<3>>
+ *     >; // => "NaN"
+ */
+export type Subtract<
+  A extends Number,
+  B extends Number
+> = A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _ToIntOrNaN<_Subtract<ADigits, BDigits>>
+    : NaN
+  : NaN;
 
-  /**
-   * Divides `Dividend` by `Divisor` and returns the result rounded down.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.Divide<Integer.FromDecimal<14>, Integer.FromDecimal<3>>
-   *     >; // => "4"
-   */
-  // @ts-expect-error - TS says it's "excessively deep" for some reason...
-  type Divide<Dividend extends Number, Divisor extends Number> = DivMod<
-    Dividend,
-    Divisor
-  >["quotient"];
+/**
+ * Returns `N-1`.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.Decrement<Integer.FromDecimal<5>>
+ *     >; // => "4"
+ */
+export type Decrement<N extends Number> = Subtract<N, One>;
 
-  /**
-   * Returns the remainder of dividing `Dividend` by `Divisor`.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.Modulo<Integer.FromDecimal<14>, Integer.FromDecimal<3>>
-   *     >; // => "2"
-   */
-  type Modulo<Dividend extends Number, Divisor extends Number> = DivMod<
-    Dividend,
-    Divisor
-  >["remainder"];
+/**
+ * Returns the product of `A` and `B`.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.Multiply<Integer.FromDecimal<3>, Integer.FromDecimal<7>>
+ *     >; // => "21"
+ */
+export type Multiply<
+  A extends Number,
+  B extends Number
+> = A extends `0b${infer ADigits}`
+  ? B extends `0b${infer BDigits}`
+    ? _ToIntOrNaN<_Multiply<ADigits, BDigits>>
+    : NaN
+  : NaN;
 
-  /**
-   * Converts a string containing a number in the specified base to an integer.
-   * Note that letter digits (like A, B, C, etc.) **must be capitalized**.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<
-   *       Integer.FromBase<"9F", Integer.FromDecimal<16>>
-   *     >; // => "159"
-   */
-  type FromBase<N extends string, Base extends Number> = Base extends Integer
-    ? _FromBase<String.Reverse<N>, Base, "0b1">
-    : NaN;
+/**
+ * Returns both the `quotient` and `remainder` when dividing `Dividend` by
+ * `Divisor`.
+ *
+ * The division algorithm returns both of these, so prefer this method
+ * over {@link Divide} and {@link Modulo} if you need both for efficiency.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.DivMod<Integer.FromDecimal<14>, Integer.FromDecimal<3>>
+ *     >; // => { quotient: "4"; remainder: "2" }
+ */
+export type DivMod<
+  Dividend extends Number,
+  Divisor extends Number
+> = Divisor extends Zero
+  ? { quotient: NaN; remainder: NaN }
+  : Dividend extends `0b${infer ADigits}`
+  ? Divisor extends `0b${infer BDigits}`
+    ? _DivMod<ADigits, BDigits>
+    : { quotient: NaN; remainder: NaN }
+  : { quotient: NaN; remainder: NaN };
 
-  /**
-   * Converts an integer to a string in the specified base. Letter digits
-   * will be capitalized.
-   *
-   * @example
-   *     type R = Integer.ToBase<Integer.FromDecimal<159>, Integer.FromDecimal<16>>; // => "9F"
-   */
-  type ToBase<N extends Number, Base extends Number> = N extends Integer
-    ? Base extends Integer
-      ? N extends Zero
-        ? _ToDigit<N>
-        : // @ts-expect-error - excessively deep
-          _ToBase<N, Base>
-      : NaN
-    : NaN;
+/**
+ * Divides `Dividend` by `Divisor` and returns the result rounded down.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.Divide<Integer.FromDecimal<14>, Integer.FromDecimal<3>>
+ *     >; // => "4"
+ */
+// @ts-expect-error - TS says it's "excessively deep" for some reason...
+export type Divide<Dividend extends Number, Divisor extends Number> = DivMod<
+  Dividend,
+  Divisor
+>["quotient"];
 
-  /**
-   * Converts a base-10 string or number into an {@link Integer}.
-   *
-   * @example
-   *     type R = Integer.FromDecimal<"6">; // => "0b011"
-   */
-  type FromDecimal<N extends string | number> = FromBase<`${N}`, Ten>;
+/**
+ * Returns the remainder of dividing `Dividend` by `Divisor`.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.Modulo<Integer.FromDecimal<14>, Integer.FromDecimal<3>>
+ *     >; // => "2"
+ */
+export type Modulo<Dividend extends Number, Divisor extends Number> = DivMod<
+  Dividend,
+  Divisor
+>["remainder"];
 
-  /**
-   * Converts an {@link Integer} to a base-10 string.
-   *
-   * @example
-   *     type R = Integer.ToDecimal<"0b011">; // => "6"
-   */
-  type ToDecimal<N extends Number> = ToBase<N, Ten>;
+/**
+ * Converts a string containing a number in the specified base to an integer.
+ * Note that letter digits (like A, B, C, etc.) **must be capitalized**.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<
+ *       Integer.FromBase<"9F", Integer.FromDecimal<16>>
+ *     >; // => "159"
+ */
+export type FromBase<
+  N extends string,
+  Base extends Number
+> = Base extends Integer ? _FromBase<String.Reverse<N>, Base, "0b1"> : NaN;
 
-  /** Any base-10 digit character. */
-  type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
-}
+/**
+ * Converts an integer to a string in the specified base. Letter digits
+ * will be capitalized.
+ *
+ * @example
+ *     type R = Integer.ToBase<Integer.FromDecimal<159>, Integer.FromDecimal<16>>; // => "9F"
+ */
+export type ToBase<N extends Number, Base extends Number> = N extends Integer
+  ? Base extends Integer
+    ? N extends Zero
+      ? _ToDigit<N>
+      : // @ts-expect-error - excessively deep
+        _ToBase<N, Base>
+    : NaN
+  : NaN;
 
-type Ten = "0b0101";
+/**
+ * Converts a base-10 string or number into an {@link Integer}.
+ *
+ * @example
+ *     type R = Integer.FromDecimal<"6">; // => "0b011"
+ */
+export type FromDecimal<N extends string | number> = FromBase<`${N}`, _Ten>;
+
+/**
+ * Converts an {@link Integer} to a base-10 string.
+ *
+ * @example
+ *     type R = Integer.ToDecimal<"0b011">; // => "6"
+ */
+export type ToDecimal<N extends Number> = ToBase<N, _Ten>;
+
+/** Any base-10 digit character. */
+export type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
+
+type _Ten = "0b0101";
 
 type _IsLessThan<
   A extends string,
@@ -364,7 +379,7 @@ type _MapChar<
   ? `${NewChar}${_MapChar<Rest, NewChar>}`
   : "";
 
-type _ToIntOrNaN<DigitsOrNaN extends string> = DigitsOrNaN extends Integer.NaN
+type _ToIntOrNaN<DigitsOrNaN extends string> = DigitsOrNaN extends NaN
   ? DigitsOrNaN
   : `0b${_StripTrailingZeroes<DigitsOrNaN>}`;
 
@@ -414,12 +429,12 @@ type _Xor<
     : A
   : B;
 
-type _ShiftLeft<
-  Digits extends string,
-  X extends Integer.Number
-> = Integer.IsLessThanOrEqual<X, Integer.Zero> extends true
+type _ShiftLeft<Digits extends string, X extends Number> = IsLessThanOrEqual<
+  X,
+  Zero
+> extends true
   ? Digits
-  : _ShiftLeft<`0${Digits}`, Integer.Decrement<X>>;
+  : _ShiftLeft<`0${Digits}`, Decrement<X>>;
 
 type _Add<
   A extends string,
@@ -461,7 +476,7 @@ type _Subtract<
       >
     : `${Result}${A}`
   : B extends `${infer _BDigit}${infer _BRest}`
-  ? Integer.NaN
+  ? NaN
   : Result;
 
 type _Multiply<
@@ -496,36 +511,34 @@ type _DivMod2<
           `1${Q}`
         >
       : _DivMod2<A, BRest, PRest, `0${Q}`>
-    : { quotient: Integer.NaN; remainder: Integer.NaN }
+    : { quotient: NaN; remainder: NaN }
   : { quotient: _ToIntOrNaN<Q>; remainder: _ToIntOrNaN<A> };
 interface _DivModResult {
-  quotient: Integer.Number;
-  remainder: Integer.Number;
+  quotient: Number;
+  remainder: Number;
 }
 
 type _FromBase<
   Num extends string,
-  Base extends Integer.Integer,
-  Power extends Integer.Integer
+  Base extends Integer,
+  Power extends Integer
 > = Num extends `${infer Digit}${infer Rest}`
-  ? Integer.Add<
-      Integer.Multiply<_FromDigit<Digit>, Power>,
-      _FromBase<Rest, Base, Integer.Multiply<Power, Base>>
+  ? Add<
+      Multiply<_FromDigit<Digit>, Power>,
+      _FromBase<Rest, Base, Multiply<Power, Base>>
     >
   : "0b";
 
 type _ToBase<
-  N extends Integer.Integer,
-  Base extends Integer.Integer,
-  Result extends _DivModResult = Integer.DivMod<N, Base>,
+  N extends Integer,
+  Base extends Integer,
+  Result extends _DivModResult = DivMod<N, Base>,
   Digit extends string = _ToDigit<Result["remainder"]>
-> = N extends Integer.Zero
+> = N extends Zero
   ? ""
   : // @ts-expect-error - excessively deep in v4.6
     `${_ToBase<
-      Result["quotient"] extends Integer.Integer
-        ? Result["quotient"]
-        : Integer.Zero,
+      Result["quotient"] extends Integer ? Result["quotient"] : Zero,
       Base
     >}${Digit}`;
 
@@ -533,7 +546,7 @@ type _ToBase<
 // a=[];for(i=0;i<36;i++)a.push(`"${i.toString(36).toUpperCase()}": "0b${[...i.toString(2)].reverse().join('')}",`);console.log(a.join('\n'))
 type _FromDigit<Digit extends string> = Digit extends keyof _DigitToNum
   ? _DigitToNum[Digit]
-  : Integer.NaN;
+  : NaN;
 interface _DigitToNum {
   "0": "0b0";
   "1": "0b1";
@@ -572,9 +585,9 @@ interface _DigitToNum {
   Y: "0b010001";
   Z: "0b110001";
 }
-type _ToDigit<Num extends Integer.Number> = Num extends keyof _NumToDigit
+type _ToDigit<Num extends Number> = Num extends keyof _NumToDigit
   ? _NumToDigit[Num]
-  : Integer.NaN;
+  : NaN;
 interface _NumToDigit {
   "0b": "0";
   "0b1": "1";
