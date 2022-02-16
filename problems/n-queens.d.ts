@@ -8,7 +8,8 @@ type _Queen = [Integer.Number, Integer.Number];
 /**
  * Solves the classical [n queens](https://wikipedia.org/wiki/Eight_queens_puzzle)
  * problem and returns a list of `[x, y]` pairs of 0-indexed coordinates where
- * the queens should be placed, or `undefined` if there is no solution.
+ * the queens should be placed such that none can attack another on the next
+ * turn, or `undefined` if there is no solution.
  *
  * See {@link NQueensVisualized} to get a more human-friendly output.
  *
@@ -127,10 +128,7 @@ type _NQueensVisualizedRow<
   ? ""
   : `${_IsQueenAt<Queens, X, Y> extends true
       ? "♕"
-      : Integer.Modulo<
-          Integer.Add<X, Y>,
-          Integer.FromDecimal<2>
-        > extends Integer.One
+      : Integer.Modulo<Integer.Add<X, Y>, Integer.Two> extends Integer.One
       ? "◼️"
       : "◻️"}\u00A0${_NQueensVisualizedRow<
       Queens,

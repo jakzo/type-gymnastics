@@ -52,12 +52,27 @@ export type Integer = `0b${string}`;
 export type NaN = `NaN`;
 
 /** The number 0 as an {@link Integer}. */
-export type Zero = "0b";
-
+export type Zero = _DigitToNum[0];
 /** The number 1 as an {@link Integer}. */
-export type One = "0b1";
-
-type _Ten = "0b0101";
+export type One = _DigitToNum[1];
+/** The number 2 as an {@link Integer}. */
+export type Two = _DigitToNum[2];
+/** The number 3 as an {@link Integer}. */
+export type Three = _DigitToNum[3];
+/** The number 4 as an {@link Integer}. */
+export type Four = _DigitToNum[4];
+/** The number 5 as an {@link Integer}. */
+export type Five = _DigitToNum[5];
+/** The number 6 as an {@link Integer}. */
+export type Six = _DigitToNum[6];
+/** The number 7 as an {@link Integer}. */
+export type Seven = _DigitToNum[7];
+/** The number 8 as an {@link Integer}. */
+export type Eight = _DigitToNum[8];
+/** The number 9 as an {@link Integer}. */
+export type Nine = _DigitToNum[9];
+/** The number 10 as an {@link Integer}. */
+export type Ten = _DigitToNum["A"];
 
 /** Any base-10 digit character. */
 export type Digit = `${0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`;
@@ -449,9 +464,13 @@ type _DivMod2<
     : { quotient: NaN; remainder: NaN }
   : { quotient: _ToIntOrNaN<Q>; remainder: _ToIntOrNaN<A> };
 
-interface _DivModResult {
-  quotient: Number;
-  remainder: Number;
+/** The quotient and remainder returned by {@link DivMod}. */
+export interface DivModResult<
+  Quotient extends Number,
+  Remainder extends Number
+> {
+  quotient: Quotient;
+  remainder: Remainder;
 }
 
 /**
@@ -525,7 +544,7 @@ export type ToBase<N extends Number, Base extends Number> = N extends Integer
 type _ToBase<
   N extends Integer,
   Base extends Integer,
-  Result extends _DivModResult = DivMod<N, Base>,
+  Result extends DivModResult<Number, Number> = DivMod<N, Base>,
   Digit extends string = _ToDigit<Result["remainder"]>
 > = N extends Zero
   ? ""
@@ -541,7 +560,7 @@ type _ToBase<
  * @example
  *     type R = Integer.FromDecimal<"6">; // => "0b011"
  */
-export type FromDecimal<N extends string | number> = FromBase<`${N}`, _Ten>;
+export type FromDecimal<N extends string | number> = FromBase<`${N}`, Ten>;
 
 /**
  * Converts an {@link Integer} to a base-10 string.
@@ -549,7 +568,7 @@ export type FromDecimal<N extends string | number> = FromBase<`${N}`, _Ten>;
  * @example
  *     type R = Integer.ToDecimal<"0b011">; // => "6"
  */
-export type ToDecimal<N extends Number> = ToBase<N, _Ten>;
+export type ToDecimal<N extends Number> = ToBase<N, Ten>;
 
 // Generated with:
 // a=[];for(i=0;i<36;i++)a.push(`"${i.toString(36).toUpperCase()}": "0b${[...i.toString(2)].reverse().join('')}",`);console.log(a.join('\n'))
@@ -557,7 +576,7 @@ type _FromDigit<Digit extends string> = Digit extends keyof _DigitToNum
   ? _DigitToNum[Digit]
   : NaN;
 interface _DigitToNum {
-  "0": "0b0";
+  "0": "0b";
   "1": "0b1";
   "2": "0b01";
   "3": "0b11";
