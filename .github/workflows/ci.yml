@@ -41,7 +41,7 @@ jobs:
       - run: git config --global user.name "github-actions[bot]" &&
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
       - run: yarn install --frozen-lockfile
-      - run: yarn util:generate-docs
+      # - run: yarn util:generate-docs
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
