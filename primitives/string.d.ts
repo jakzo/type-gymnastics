@@ -18,11 +18,21 @@ export type Reverse<Str extends string> = Str extends `${infer Ch}${infer Rest}`
  * Repeats a string the specified number of times.
  *
  * @example
- *     type R = String.Repeat<"abc", Integer.FromDecimal<3>>; // => "abcabcabc"
+ *     type R = String.Repeat<"abc", 3>; // => "abcabcabc"
  */
-export type Repeat<
+export type Repeat<Str extends string, Times extends number> = _Repeat<
+  Str,
+  Integer.FromDecimal<Times>
+>;
+
+export type _Repeat<
   Str extends string,
-  Times extends Integer.Number
-> = Integer.IsLessThanOrEqual<Times, Integer.Zero> extends true
-  ? ""
-  : `${Str}${Repeat<Str, Integer.Decrement<Times>>}`;
+  Times extends Integer.Number,
+  S extends string = Str
+> = Integer.IsGreaterThan<Times, Integer.Zero> extends true
+  ? `${Times extends `0b1${string}` ? S : ""}${_Repeat<
+      Str,
+      Integer.ShiftRight<Times, Integer.One>,
+      `${S}${S}`
+    >}`
+  : "";

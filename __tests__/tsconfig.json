@@ -1,4 +1,6 @@
 {
+  "extends": "../tsconfig.json",
+  "exclude": ["../**/*.wip.*", "../**/collatz.d.ts"],
   "compilerOptions": {
     "module": "ESNext",
     "lib": [],
@@ -9,9 +11,5 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "noEmit": true
-  },
-  "typedocOptions": {
-    "entryPoints": ["./index.d.ts"],
-    "out": "./docs"
   }
 }

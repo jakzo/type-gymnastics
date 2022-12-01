@@ -15,18 +15,19 @@ type Operators2 = "*" | "/" | "%";
  * step ever evaluates to a negative number the result will be {@link NaN}.
  *
  * @example
- *     type R = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">; // => "45"
+ *     type R = Math.Evaluate<"12 + 34 - 5*(6*7 % 8) + 9">; // => 45
  */
-export type Evaluate<Expression extends string> = _Eval<Expression>;
+export type Evaluate<Expression extends string> =
+  _Evaluate<Expression> extends `${infer N extends number}` ? N : Integer.NaN;
 
-type _Eval<
+export type _Evaluate<
   Expr extends string,
   OutputStack extends string[] = [],
   OperatorStack extends string[] = [],
   NumToken extends string = ""
 > = Expr extends `${infer Ch}${infer Rest}`
   ? Ch extends Integer.Digit
-    ? _Eval<
+    ? _Evaluate<
         Rest,
         [
           Integer.FromDecimal<`${NumToken}${Ch}`>,
@@ -46,21 +47,21 @@ type _Eval<
           Ch
         > extends true
         ? _ApplyOpFromStack<Op, Expr, OutputStack, OperatorStackRest>
-        : _Eval<Rest, OutputStack, [Ch, ...OperatorStack]>
-      : _Eval<Rest, OutputStack, [Ch, ...OperatorStack]>
+        : _Evaluate<Rest, OutputStack, [Ch, ...OperatorStack]>
+      : _Evaluate<Rest, OutputStack, [Ch, ...OperatorStack]>
     : Ch extends "("
-    ? _Eval<Rest, OutputStack, [Ch, ...OperatorStack]>
+    ? _Evaluate<Rest, OutputStack, [Ch, ...OperatorStack]>
     : Ch extends ")"
     ? OperatorStack extends [infer Op, ...infer OperatorStackRest]
       ? Op extends "("
-        ? _Eval<
+        ? _Evaluate<
             Rest,
             OutputStack,
             OperatorStackRest extends string[] ? OperatorStackRest : []
           >
         : _ApplyOpFromStack<Op, Expr, OutputStack, OperatorStackRest>
       : Integer.NaN
-    : _Eval<Rest, OutputStack, OperatorStack>
+    : _Evaluate<Rest, OutputStack, OperatorStack>
   : OperatorStack extends [infer Op, ...infer OperatorStackRest]
   ? _ApplyOpFromStack<Op, Expr, OutputStack, OperatorStackRest>
   : OutputStack extends [infer N]
@@ -75,7 +76,7 @@ type _ApplyOpFromStack<
   OutputStack,
   OperatorStack
 > = OutputStack extends [infer B, infer A, ...infer OutputStackRest]
-  ? _Eval<
+  ? _Evaluate<
       Expr,
       [
         _ApplyOp<

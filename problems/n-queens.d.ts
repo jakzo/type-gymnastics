@@ -3,7 +3,22 @@ import * as Integer from "../primitives/integer";
 
 export {};
 
-type _Queen = [Integer.Number, Integer.Number];
+type Coord = [number, number];
+type _Coord = [Integer.Number, Integer.Number];
+
+type CoordNumsToInts<Coords extends Coord[]> = Coords extends [
+  [infer X extends number, infer Y extends number],
+  ...infer Rest extends Coord[]
+]
+  ? [[Integer.FromDecimal<X>, Integer.FromDecimal<Y>], ...CoordNumsToInts<Rest>]
+  : [];
+
+type CoordIntsToNums<Coords extends _Coord[]> = Coords extends [
+  [infer X extends Integer.Number, infer Y extends Integer.Number],
+  ...infer Rest extends _Coord[]
+]
+  ? [[Integer.ToNumber<X>, Integer.ToNumber<Y>], ...CoordIntsToNums<Rest>]
+  : [];
 
 /**
  * Solves the classical [n queens](https://wikipedia.org/wiki/Eight_queens_puzzle)
@@ -14,18 +29,20 @@ type _Queen = [Integer.Number, Integer.Number];
  * See {@link NQueensVisualized} to get a more human-friendly output.
  *
  * @example
- *     type R = Problems.NQueens<Integer.FromDecimal<8>, Integer.FromDecimal<8>>;
+ *     type R = Problems.NQueens<8, 8>;
  *     // => [["0b11", "0b111"], ["0b1", "0b011"], ["0b011", "0b101"], ["0b01", "0b001"], ["0b101", "0b11"], ["0b111", "0b01"], ["0b001", "0b1"], ["0b", "0b"]]
  */
-export type NQueens<
-  ToPlace extends Integer.Number = Integer.FromDecimal<8>,
-  GridSize extends Integer.Number = Integer.FromDecimal<8>
-> = _NQueens<ToPlace, GridSize>;
+export type NQueens<ToPlace extends number, GridSize extends number> = _NQueens<
+  Integer.FromDecimal<ToPlace>,
+  Integer.FromDecimal<GridSize>
+> extends infer R extends _Coord[]
+  ? CoordIntsToNums<R>
+  : undefined;
 
-type _NQueens<
+export type _NQueens<
   ToPlace extends Integer.Number,
   GridSize extends Integer.Number,
-  Queens extends _Queen[] = [],
+  Queens extends _Coord[] = [],
   X extends Integer.Number = Integer.Zero,
   Y extends Integer.Number = Integer.Zero
 > = ToPlace extends Integer.Zero
@@ -41,7 +58,7 @@ type _NQueens<
       [[X, Y], ...Queens],
       Integer.Increment<X>,
       Y
-    > extends _Queen[]
+    > extends _Coord[]
     ? _NQueens<
         Integer.Decrement<ToPlace>,
         GridSize,
@@ -55,36 +72,30 @@ type _NQueens<
 type _IsThreatened<
   X extends Integer.Number,
   Y extends Integer.Number,
-  Queens extends _Queen[],
+  Queens extends _Coord[],
   GridSize extends Integer.Number
-> = Queens extends [[infer QX, infer QY], ...infer QueensRest]
-  ? QX extends Integer.Number
-    ? QY extends Integer.Number
-      ? QX extends X
-        ? true
-        : QY extends Y
-        ? true
-        : Integer.Subtract<
-            Integer.Add<X, GridSize>,
-            Y
-          > extends Integer.Subtract<Integer.Add<GridSize, QX>, QY>
-        ? true
-        : Integer.Subtract<
-            Integer.Add<Integer.Subtract<GridSize, X>, GridSize>,
-            Y
-          > extends Integer.Subtract<
-            Integer.Add<Integer.Subtract<GridSize, QX>, GridSize>,
-            QY
-          >
-        ? true
-        : _IsThreatened<
-            X,
-            Y,
-            QueensRest extends _Queen[] ? QueensRest : [],
-            GridSize
-          >
-      : false
-    : false
+> = Queens extends [
+  [infer QX extends Integer.Number, infer QY extends Integer.Number],
+  ...infer QueensRest extends _Coord[]
+]
+  ? QX extends X
+    ? true
+    : QY extends Y
+    ? true
+    : Integer.Subtract<Integer.Add<X, GridSize>, Y> extends Integer.Subtract<
+        Integer.Add<GridSize, QX>,
+        QY
+      >
+    ? true
+    : Integer.Subtract<
+        Integer.Add<Integer.Subtract<GridSize, X>, GridSize>,
+        Y
+      > extends Integer.Subtract<
+        Integer.Add<Integer.Subtract<GridSize, QX>, GridSize>,
+        QY
+      >
+    ? true
+    : _IsThreatened<X, Y, QueensRest, GridSize>
   : false;
 
 /**
@@ -94,21 +105,19 @@ type _IsThreatened<
  *
  * @example
  *     type R = Problems.NQueensVisualized<
- *       Problems.NQueens<Integer.FromDecimal<4>, Integer.FromDecimal<4>>,
- *       Integer.FromDecimal<4>
- *     >; // => "
+ *       Problems.NQueens<4, 4>, 4>; // => "
  *     // ◻️ ♕ ◻️ ◼️
  *     // ◼️ ◻️ ◼️ ♕
  *     // ♕ ◼️ ◻️ ◼️
  *     // ◼️ ◻️ ♕ ◻️"
  */
 export type NQueensVisualized<
-  Queens extends _Queen[] = NQueens,
-  GridSize extends Integer.Number = Integer.FromDecimal<8>
-> = _NQueensVisualized<Queens, GridSize>;
+  Queens extends Coord[],
+  GridSize extends number
+> = _NQueensVisualized<CoordNumsToInts<Queens>, Integer.FromDecimal<GridSize>>;
 
-type _NQueensVisualized<
-  Queens extends _Queen[],
+export type _NQueensVisualized<
+  Queens extends _Coord[],
   GridSize extends Integer.Number,
   Y extends Integer.Number = Integer.Zero
 > = Y extends GridSize
@@ -120,7 +129,7 @@ type _NQueensVisualized<
     >}${_NQueensVisualized<Queens, GridSize, Integer.Increment<Y>>}`;
 
 type _NQueensVisualizedRow<
-  Queens extends _Queen[],
+  Queens extends _Coord[],
   GridSize extends Integer.Number,
   Y extends Integer.Number,
   X extends Integer.Number = Integer.Zero
@@ -130,7 +139,7 @@ type _NQueensVisualizedRow<
       ? "♕"
       : Integer.Modulo<Integer.Add<X, Y>, Integer.Two> extends Integer.One
       ? "◼️"
-      : "◻️"}\u00A0${_NQueensVisualizedRow<
+      : "◻️"}${_NBSP}${_NQueensVisualizedRow<
       Queens,
       GridSize,
       Y,
@@ -138,13 +147,14 @@ type _NQueensVisualizedRow<
     >}`;
 
 type _IsQueenAt<
-  Queens extends _Queen[],
+  Queens extends _Coord[],
   X extends Integer.Number,
   Y extends Integer.Number
 > = Queens extends [[infer QX, infer QY], ...infer QueensRest]
   ? (QX extends X ? (QY extends Y ? true : false) : false) extends true
     ? true
-    : _IsQueenAt<QueensRest extends _Queen[] ? QueensRest : [], X, Y>
+    : _IsQueenAt<QueensRest extends _Coord[] ? QueensRest : [], X, Y>
   : false;
 
-type _TooltipLinebreak = `${String.Repeat<"\u00A0", Integer.FromDecimal<48>>} `;
+type _TooltipLinebreak = `${String.Repeat<_NBSP, 200>} `;
+type _NBSP = "\u00A0";

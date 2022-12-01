@@ -9,23 +9,34 @@ export {};
  * with each element filled with the provided value.
  *
  * @example
- *     type R = Array.Create<[Integer.FromDecimal<2>, Integer.FromDecimal<3>], 1>;
+ *     type R = Array.Create<[2, 3], 1>;
  *     // => [[1, 1, 1], [1, 1, 1]]
  */
-export type Create<
+export type Create<Dimensions extends number[], FillValue> = _Create<
+  DimsToInts<Dimensions>,
+  FillValue
+>;
+
+export type _Create<
   Dimensions extends Integer.Number[],
   FillValue
-> = Dimensions extends [infer Size, ...infer DimensionsRest]
-  ? Size extends Integer.Number
-    ? DimensionsRest extends Integer.Number[]
-      ? Size extends Integer.Zero
-        ? []
-        : [
-            DimensionsRest extends []
-              ? FillValue
-              : Create<DimensionsRest, FillValue>,
-            ...Create<[Integer.Decrement<Size>, ...DimensionsRest], FillValue>
-          ]
-      : []
-    : []
+> = Dimensions extends [
+  infer Size extends Integer.Number,
+  ...infer DimensionsRest extends Integer.Number[]
+]
+  ? Size extends Integer.Zero
+    ? []
+    : [
+        DimensionsRest extends []
+          ? FillValue
+          : _Create<DimensionsRest, FillValue>,
+        ..._Create<[Integer.Decrement<Size>, ...DimensionsRest], FillValue>
+      ]
+  : [];
+
+type DimsToInts<Dimensions extends number[]> = Dimensions extends [
+  infer N extends number,
+  ...infer Rest extends number[]
+]
+  ? [Integer.FromDecimal<N>, ...DimsToInts<Rest>]
   : [];

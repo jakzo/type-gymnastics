@@ -11,10 +11,12 @@ export {};
  * every positive integer should reach 1 eventually, though it is famously yet to be proven.
  *
  * @example
- *     type R = Integer.ToDecimal<Math.Collatz<Integer.FromDecimal<6>>>; // => "8"
+ *     type R = Math.Collatz<6>; // => 8
  */
+export type Collatz<N extends number> = Integer.ToNumber<
+  _Collatz<Integer.FromDecimal<N>>
+>;
 // @ts-expect-error - excessively deep
-export type Collatz<N extends Integer.Number> = _Collatz<N>;
 type _Collatz<
   N extends Integer.Number,
   Result extends Integer.DivModResult<

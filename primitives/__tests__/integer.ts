@@ -16,9 +16,12 @@ import {
   Nand,
   Not,
   Or,
+  ShiftLeft,
+  ShiftRight,
   Subtract,
   ToBase,
   ToDecimal,
+  ToNumber,
   Xor,
 } from "primitives/integer";
 
@@ -128,6 +131,18 @@ test<Xor<"0b01", "0b11">>(); // $ExpectType "0b1"
 test<Xor<"0b11", "0b11">>(); // $ExpectType "0b"
 test<Xor<"0b110100010111101", "0b0111010011101">>(); // $ExpectType "0b101001011001001"
 
+test<ShiftLeft<"0b", "0b">>(); // $ExpectType "0b"
+test<ShiftLeft<"0b1", "0b">>(); // $ExpectType "0b1"
+test<ShiftLeft<"0b1", "0b1">>(); // $ExpectType "0b01"
+test<ShiftLeft<"0b1", "0b11">>(); // $ExpectType "0b0001"
+test<ShiftLeft<"0b1101", "0b11">>(); // $ExpectType "0b0001101"
+
+test<ShiftRight<"0b", "0b">>(); // $ExpectType "0b"
+test<ShiftRight<"0b1", "0b">>(); // $ExpectType "0b1"
+test<ShiftRight<"0b1", "0b1">>(); // $ExpectType "0b"
+test<ShiftRight<"0b1", "0b11">>(); // $ExpectType "0b"
+test<ShiftRight<"0b11101", "0b11">>(); // $ExpectType "0b01"
+
 test<Add<"0b", "0b">>(); // $ExpectType "0b"
 test<Add<"0b1", "0b">>(); // $ExpectType "0b1"
 test<Add<"0b01", "0b">>(); // $ExpectType "0b01"
@@ -223,3 +238,13 @@ test<ToDecimal<"0b101">>(); // $ExpectType "5"
 test<ToDecimal<"0b1001">>(); // $ExpectType "9"
 test<ToDecimal<"0b0101">>(); // $ExpectType "10"
 test<ToDecimal<"0b10011100000011">>(); // $ExpectType "12345"
+
+test<ToNumber<"0b">>(); // $ExpectType 0
+test<ToNumber<"0b1">>(); // $ExpectType 1
+test<ToNumber<"0b01">>(); // $ExpectType 2
+test<ToNumber<"0b11">>(); // $ExpectType 3
+test<ToNumber<"0b001">>(); // $ExpectType 4
+test<ToNumber<"0b101">>(); // $ExpectType 5
+test<ToNumber<"0b1001">>(); // $ExpectType 9
+test<ToNumber<"0b0101">>(); // $ExpectType 10
+test<ToNumber<"0b10011100000011">>(); // $ExpectType 12345

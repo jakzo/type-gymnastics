@@ -10,14 +10,18 @@ export {};
  * caches the results.
  *
  * @example
- *     type R = Integer.ToDecimal<Math.Fibonacci<Integer.FromDecimal<6>>>; // => "8"
+ *     type R = Math.Fibonacci<6>; // => 8
  */
-export type Fibonacci<N extends Integer.Number> = Integer.IsLessThanOrEqual<
+export type Fibonacci<N extends number> = Integer.ToNumber<
+  _Fibonacci<Integer.FromDecimal<N>>
+>;
+
+export type _Fibonacci<N extends Integer.Number> = Integer.IsLessThanOrEqual<
   N,
   Integer.Two
 > extends true
   ? Integer.One
   : Integer.Add<
-      Fibonacci<Integer.Subtract<N, Integer.One>>,
-      Fibonacci<Integer.Subtract<N, Integer.Two>>
+      _Fibonacci<Integer.Subtract<N, Integer.One>>,
+      _Fibonacci<Integer.Subtract<N, Integer.Two>>
     >;

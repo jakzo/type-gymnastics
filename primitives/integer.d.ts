@@ -272,12 +272,12 @@ type _Xor<
  * if they are in little endian, meaning it makes numbers larger.
  *
  * @example
- *     type R = Integer.ShiftLeft<"0b1101", Integer.FromDecimal<2>>; // => "0b001001"
+ *     type R = Integer.ShiftLeft<"0b1101", Integer.FromDecimal<2>>; // => "0b001101"
  */
 export type ShiftLeft<
   N extends Number,
   X extends Number
-> = N extends `0b${infer Digits}` ? _ShiftLeft<Digits, X> : NaN;
+> = N extends `0b${infer Digits}` ? `0b${_ShiftLeft<Digits, X>}` : NaN;
 
 type _ShiftLeft<Digits extends string, X extends Number> = IsLessThanOrEqual<
   X,
@@ -285,6 +285,29 @@ type _ShiftLeft<Digits extends string, X extends Number> = IsLessThanOrEqual<
 > extends true
   ? Digits
   : _ShiftLeft<`0${Digits}`, Decrement<X>>;
+
+/**
+ * Returns `N` bitwise shifted `X` times to the right.
+ *
+ * Note that despite integers being notated in big endian, this is named as
+ * if they are in little endian, meaning it makes numbers smaller.
+ *
+ * @example
+ *     type R = Integer.ShiftRight<"0b1101", Integer.FromDecimal<2>>; // => "0b01"
+ */
+export type ShiftRight<
+  N extends Number,
+  X extends Number
+> = N extends `0b${infer Digits}` ? `0b${_ShiftRight<Digits, X>}` : NaN;
+
+type _ShiftRight<Digits extends string, X extends Number> = IsLessThanOrEqual<
+  X,
+  Zero
+> extends true
+  ? Digits
+  : Digits extends `${infer _Digit}${infer Rest}`
+  ? _ShiftRight<Rest, Decrement<X>>
+  : "";
 
 /**
  * Returns the sum of `A` and `B`.
@@ -569,6 +592,19 @@ export type FromDecimal<N extends string | number> = FromBase<`${N}`, Ten>;
  *     type R = Integer.ToDecimal<"0b011">; // => "6"
  */
 export type ToDecimal<N extends Number> = ToBase<N, Ten>;
+
+/**
+ * Converts an {@link Integer} to a number.
+ *
+ * @example
+ *     type R = Integer.ToNumber<"0b011">; // => 6
+ */
+export type ToNumber<N extends Number> = ToBase<
+  N,
+  Ten
+> extends `${infer N extends number}`
+  ? N
+  : NaN;
 
 // Generated with:
 // a=[];for(i=0;i<36;i++)a.push(`"${i.toString(36).toUpperCase()}": "0b${[...i.toString(2)].reverse().join('')}",`);console.log(a.join('\n'))
