@@ -13,10 +13,11 @@ import {
   BubbleSort,
   _ArrOfLen,
   MaxIndex,
+  ReverseMap,
+  Range,
 } from "primitives/array";
-import { FromDecimal } from "primitives/integer";
 
-test<Create<[2, 3], 1>>(); // $ExpectType [[1, 1, 1], [1, 1, 1]]
+test<Create<[3, 2], 1>>(); // $ExpectType [[1, 1, 1], [1, 1, 1]]
 
 test<Max<[1]>>(); // $ExpectType 1
 test<Max<[7, 4, 9, 5]>>(); // $ExpectType 9
@@ -58,6 +59,10 @@ test<Slice<[1, 2, 3, 4, 5], 3, 0>>(); // $ExpectType []
 
 test<Reverse<[1, 2, 3]>>(); // $ExpectType [3, 2, 1]
 
+test<ReverseMap<[1, 2, 3]>>(); // $ExpectType [3, 2, 1]
+
 test<Chunked<[1, 2, 3, 4, 5], 2>>(); // $ExpectType [[1, 2], [3, 4], [5]]
 test<Chunked<[], 2>>(); // $ExpectType []
 test<Chunked<[1], 2>>(); // $ExpectType [[1]]
+
+test<Range<3>>(); // $ExpectType [0, 1, 2]

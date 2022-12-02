@@ -5,15 +5,15 @@ import * as Integer from "./integer";
 export {};
 
 /**
- * Creates a multi-dimensional array with the specified dimensions and
- * with each element filled with the provided value.
+ * Creates an array with the specified dimensions and size where
+ * each element is filled with the provided value.
  *
  * @example
- *     type R = Array.Create<[2, 3], 1>;
+ *     type R = Array.Create<[3, 2], 1>;
  *     // => [[1, 1, 1], [1, 1, 1]]
  */
 export type Create<Dimensions extends number[], FillValue> = _Create<
-  DimsToInts<Dimensions>,
+  MapNumToInt<Dimensions>,
   FillValue
 >;
 
@@ -24,33 +24,21 @@ export type _Create<
   infer Size extends Integer.Number,
   ...infer DimensionsRest extends Integer.Number[]
 ]
-  ? Size extends Integer.Zero
-    ? []
-    : // @ts-expect-error
-      [
-        DimensionsRest extends []
-          ? FillValue
-          : _Create<DimensionsRest, FillValue>,
-        ..._Create<[Integer.Decrement<Size>, ...DimensionsRest], FillValue>
-      ]
-  : [];
+  ? _Create<DimensionsRest, _ArrOfLen<Size, FillValue>>
+  : FillValue;
 
-type DimsToInts<Dimensions extends number[]> = Dimensions extends [
-  infer N extends number,
-  ...infer Rest extends number[]
-]
-  ? [Integer.FromDecimal<N>, ...DimsToInts<Rest>]
-  : [];
-
-// TODO: Use this in Create
 export type _ArrOfLen<
   Len extends Integer.Number,
-  T = unknown,
-  Acc extends T[] = [T]
+  FillValue = unknown,
+  Acc extends FillValue[] = [FillValue]
 > = Len extends Integer.NonZero
   ? [
       ...(Len extends Integer.Odd ? Acc : []),
-      ..._ArrOfLen<Integer.ShiftRight<Len, Integer.One>, T, [...Acc, ...Acc]>
+      ..._ArrOfLen<
+        Integer.ShiftRight<Len, Integer.One>,
+        FillValue,
+        [...Acc, ...Acc]
+      >
     ]
   : [];
 
@@ -133,12 +121,18 @@ export type MapIntToNum<A extends Integer.Number[]> = {
 /**
  * Adds all numbers in a list together and returns the result.
  *
+ * - Limits: `Arr` = 80
+ * - Time: `O(n)`
+ * - Space: `O(n^2)`
+ *
  * @example
  *     type R = Array.Sum<[1, 2, 3]>; // => 6
  */
-export type Sum<A extends number[]> = Integer.ToNumber<_Sum<MapNumToInt<A>>>;
+export type Sum<Arr extends number[]> = Integer.ToNumber<
+  _Sum<MapNumToInt<Arr>>
+>;
 
-export type _Sum<A extends Integer.Number[]> = A extends [
+export type _Sum<Arr extends Integer.Number[]> = Arr extends [
   infer N extends Integer.Number,
   ...infer Rest extends Integer.Number[]
 ]
@@ -146,13 +140,17 @@ export type _Sum<A extends Integer.Number[]> = A extends [
   : Integer.Zero;
 
 /**
- * Same as {@link Sum} but faster and less stable.
+ * Adds all numbers in a list together and returns the result.
+ *
+ * - Limits: `Arr` = 2000
+ * - Time: `O(n)`
+ * - Space: `O(n log n)`
  *
  * @example
  *     type R = Array.Sum<[1, 2, 3]>; // => 6
  */
-export type SumBinary<A extends number[]> = Integer.ToNumber<
-  _SumBinary<MapNumToInt<A>>
+export type SumBinary<Arr extends number[]> = Integer.ToNumber<
+  _SumBinary<MapNumToInt<Arr>>
 >;
 
 export type _SumBinary<
@@ -163,7 +161,7 @@ export type _SumBinary<
 > = Len extends Integer.Zero
   ? Integer.Zero
   : Len extends Integer.One
-  ? Arr[Integer.ToNumber<Idx> extends infer N extends number ? N : never]
+  ? Arr[Integer.ToNumber<Idx>]
   : Integer.Add<
       _SumBinary<Arr, Idx, HalfLen>,
       _SumBinary<
@@ -264,6 +262,10 @@ type _SortMerge<
 /**
  * Splits an array into subarrays of length `Size`.
  *
+ * - Limits: `Arr` = 2000
+ * - Time: `O(n log n)`
+ * - Space: `O(n log n)`
+ *
  * @example
  *     type R = Chunked<[1, 2, 3, 4, 5], 2> // => [[1, 2], [3, 4], [5]]
  */
@@ -274,15 +276,14 @@ export type Chunked<Arr extends unknown[], Size extends number> = _Chunked<
 export type _Chunked<
   Arr extends unknown[],
   Size extends Integer.Number,
-  ChunkSizeResult extends {
-    quotient: Integer.Number;
-    remainder: Integer.Number;
-  } = Integer.DivMod<Integer.FromDecimal<Arr["length"]>, Size>,
+  ChunkSizeResult extends Integer.DivModResult = Integer.DivMod<
+    Integer.FromDecimal<Arr["length"]>,
+    Size
+  >,
   MappeeChunks extends unknown[] = _ArrOfLen<
     ChunkSizeResult["remainder"] extends Integer.Zero
       ? ChunkSizeResult["quotient"]
-      : Integer.Increment<ChunkSizeResult["quotient"]>,
-    Size
+      : Integer.Increment<ChunkSizeResult["quotient"]>
   >,
   MappeeChunk extends unknown[] = _ArrOfLen<Size>,
   MappeeLastChunk extends unknown[] = _ArrOfLen<ChunkSizeResult["remainder"]>
@@ -303,50 +304,25 @@ type _GetChunk<
   Mappee extends unknown[]
 > = {
   [K in keyof Mappee]: K extends `${number}`
-    ? Arr[Integer.ToNumber<Integer.Add<Integer.FromDecimal<K>, Idx>>]
+    ? Arr[Integer.ToNumber<Integer.Add<Idx, Integer.FromDecimal<K>>>]
     : never;
 };
-type DivCeil<
-  N extends Integer.Number,
-  D extends Integer.Number,
-  R extends {
-    quotient: Integer.Number;
-    remainder: Integer.Number;
-  } = Integer.DivMod<N, D>
-> = R["remainder"] extends Integer.Zero
-  ? R["quotient"]
-  : Integer.Increment<R["quotient"]>;
 
 /**
- * Same as {@link Chunked} but generates chunks which use the same amount
- * of memory as `Arr` but only uses one recursion depth.
+ * Returns a list of numbers starting from 0.
+ *
+ * - Limits: `Size` = 8000
+ * - Time: `O(n log n)`
+ * - Space: `O(n log n)`
+ *
+ * @example
+ *     type R = Chunked<[1, 2, 3, 4, 5], 2> // => [[1, 2], [3, 4], [5]]
  */
-export type ChunkedLowRecHighMem<
-  Arr extends unknown[],
-  Size extends number
-> = _ChunkedLowRecHighMem<Arr, Integer.FromDecimal<Size>>;
-export type _ChunkedLowRecHighMem<
-  Arr extends unknown[],
-  Size extends Integer.Number
+export type Range<
+  Size extends number,
+  Mappee extends unknown[] = _ArrOfLen<Integer.FromDecimal<Size>, unknown>
 > = {
-  [K in keyof Arr]: K extends `${number}`
-    ? _GetChunkLowRecHighMem<
-        Arr,
-        Integer.Multiply<Integer.FromDecimal<K>, Size>,
-        Size
-      >
-    : never;
-};
-type _GetChunkLowRecHighMem<
-  Arr extends unknown[],
-  Idx extends Integer.Number,
-  Size extends Integer.Number
-> = {
-  [K in keyof Arr]: K extends `${number}`
-    ? Integer.IsLessThan<Integer.FromDecimal<K>, Size> extends true
-      ? Arr[Integer.ToNumber<Integer.Add<Integer.FromDecimal<K>, Idx>>]
-      : never
-    : never;
+  [K in keyof Mappee]: K extends `${infer N extends number}` ? N : never;
 };
 
 /**
@@ -411,16 +387,42 @@ export type _Slice<
 /**
  * Reverses an array.
  *
+ * - Limits: `Arr` = 2500
+ * - Time: `O(n log n)`
+ * - Space: `O(n log n)`
+ *
  * @example
  *     type R = Array.Reverse<[1, 2, 3]>; // => [3, 2, 1]
  */
-export type Reverse3<Arr extends unknown[]> = Arr extends [
-  infer X,
-  ...infer Rest
-]
-  ? [...Reverse<Rest>, X]
-  : [];
-export type Reverse<Arr extends unknown[]> = {
+export type Reverse<
+  Arr extends unknown[],
+  Idx extends Integer.Number = Integer.Zero,
+  Size extends Integer.Number = Integer.FromDecimal<Arr["length"]>,
+  HalfSize extends Integer.Number = Integer.ShiftRight<Size, Integer.One>
+> = Size extends Integer.Zero
+  ? []
+  : Size extends Integer.One
+  ? [Arr[Integer.ToNumber<Idx>]]
+  : [
+      ...Reverse<
+        Arr,
+        Integer.Add<Idx, HalfSize>,
+        Size extends Integer.Odd ? Integer.Increment<HalfSize> : HalfSize
+      >,
+      ...Reverse<Arr, Idx, HalfSize>
+    ];
+
+/**
+ * Reverses an array.
+ *
+ * - Limits: `Arr` = 2000
+ * - Time: `O(n)`
+ * - Space: `O(n)`
+ *
+ * @example
+ *     type R = Array.Reverse<[1, 2, 3]>; // => [3, 2, 1]
+ */
+export type ReverseMap<Arr extends unknown[]> = {
   [K in keyof Arr]: K extends `${number}`
     ? Arr[Integer.ToNumber<
         Integer.Decrement<
