@@ -46,6 +46,30 @@ export type Number = Integer | NaN;
 export type Integer = `0b${string}`;
 
 /**
+ * A non-zero concrete integer (not {@link NaN}).
+ *
+ * @example
+ *     const n: Integer.NonZero = "0b01101"; // 22 in decimal
+ */
+export type NonZero = `0b${"0" | "1"}${string}`;
+
+/**
+ * An even non-zero integer.
+ *
+ * @example
+ *     const n: Integer.Even = "0b01101"; // 22 in decimal
+ */
+export type Even = `0b0${string}`;
+
+/**
+ * An odd non-zero integer.
+ *
+ * @example
+ *     const n: Integer.Odd = "0b11101"; // 23 in decimal
+ */
+export type Odd = `0b1${string}`;
+
+/**
  * Not-a-number. When an operation that returns a number is not defined (eg.
  * dividing by zero) it will return this.
  */
@@ -604,7 +628,7 @@ export type ToNumber<N extends Number> = ToBase<
   Ten
 > extends `${infer N extends number}`
   ? N
-  : NaN;
+  : number;
 
 // Generated with:
 // a=[];for(i=0;i<36;i++)a.push(`"${i.toString(36).toUpperCase()}": "0b${[...i.toString(2)].reverse().join('')}",`);console.log(a.join('\n'))
