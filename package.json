@@ -1,6 +1,6 @@
 {
   "name": "@jakzo/type-gymnastics",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Collection of crazy advanced types in TypeScript.",
   "types": "index.d.ts",
   "author": "jakzo",
