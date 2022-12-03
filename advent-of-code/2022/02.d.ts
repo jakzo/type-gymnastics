@@ -51,6 +51,7 @@ type CalculateBig<
     >
   >
 > = Integer.ToNumber<PartitionedSum>;
+
 type GetPoints<
   Input extends string[],
   LookupTable extends Record<string, number>,

@@ -172,6 +172,23 @@ export type _SumBinary<
     >;
 
 /**
+ * Counts the number of times a specific value appears in an array.
+ *
+ * - Limits: `Arr` = 2000
+ * - Time: `O(n)`
+ * - Space: `O(n log n)`
+ *
+ * @example
+ *     type R = Array.Count<[true, false, true]>; // => 2
+ *     type R = Array.Count<["x", "y", "z", "y"], "y">; // => 2
+ */
+export type Count<Arr extends unknown[], Value = true> = Integer.ToNumber<
+  _SumBinary<{
+    [K in keyof Arr]: Arr[K] extends Value ? Integer.One : Integer.Zero;
+  }>
+>;
+
+/**
  * Sorts using something similar to a bubble sort algorithm where each item is
  * compared to every other item.
  * Time complexity is `O(n^2)` but recursion is `O(log n)`.

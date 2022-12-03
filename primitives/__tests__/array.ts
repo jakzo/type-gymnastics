@@ -15,6 +15,7 @@ import {
   MaxIndex,
   ReverseMap,
   Range,
+  Count,
 } from "primitives/array";
 
 test<Create<[3, 2], 1>>(); // $ExpectType [[1, 1, 1], [1, 1, 1]]
@@ -66,3 +67,8 @@ test<Chunked<[], 2>>(); // $ExpectType []
 test<Chunked<[1], 2>>(); // $ExpectType [[1]]
 
 test<Range<3>>(); // $ExpectType [0, 1, 2]
+
+test<Count<["x", "y", "z", "y"], "y">>(); // $ExpectType 2
+test<Count<[1, 2, 3], 4>>(); // $ExpectType 0
+test<Count<[1, 2, 3, 2, 1], 2 | 3>>(); // $ExpectType 3
+test<Count<[1, 1, 1, 1, 1], 1>>(); // $ExpectType 5
