@@ -102,3 +102,32 @@ export type Substr<
 export type Chars<Str extends string> = Str extends `${infer Ch}${infer Rest}`
   ? [Ch, ...Chars<Rest>]
   : [];
+
+/**
+ * Parses all distinct decimal integers found in `Str`.
+ *
+ * @example
+ *     type R = String.ParseInts<"1+2.3-4">; // => [1, 2, 3, 4]
+ */
+export type ParseInts<Str extends string> = _ParseInts<Str> extends infer Res
+  ? {
+      [K in keyof Res]: Res[K] extends Integer.Number
+        ? Integer.ToNumber<Res[K]>
+        : never;
+    }
+  : never;
+export type _ParseInts<
+  Str extends string,
+  Res extends Integer.Number[] = [],
+  Digits extends string = ""
+> = Str extends `${infer Ch}${infer Rest}`
+  ? Ch extends Integer.Digit
+    ? _ParseInts<Rest, Res, `${Digits}${Ch}`>
+    : _ParseInts<Rest, _ParseIntsAdd<Res, Digits>, "">
+  : _ParseIntsAdd<Res, Digits>;
+type _ParseIntsAdd<
+  Res extends Integer.Number[],
+  Digits extends string
+> = Digits extends `${Integer.Digit}${string}`
+  ? [...Res, Integer.FromDecimal<Digits>]
+  : Res;

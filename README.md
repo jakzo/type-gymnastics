@@ -52,7 +52,7 @@ If you're in VSCode, **use this command whenever things start going wonky**:
 CTRL/CMD+SHIFT+P -> Restart TypeScript Server
 ```
 
-The TS server will frequently get into a broken while you're in the process of typing code so you may find that you quickly memorize this command. 🙂
+The TS server will frequently get into a broken state while you're in the process of typing code so you may find that you quickly memorize this command. 🙂
 
 #### Efficiently chaining function calls
 

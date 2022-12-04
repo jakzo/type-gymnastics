@@ -1,4 +1,12 @@
-import { Reverse, Repeat, Chomp, Take, Len, Chars } from "primitives/string";
+import {
+  Reverse,
+  Repeat,
+  Chomp,
+  Take,
+  Len,
+  Chars,
+  ParseInts,
+} from "primitives/string";
 
 test<Reverse<"Hello, world!">>(); // $ExpectType "!dlrow ,olleH"
 
@@ -17,3 +25,7 @@ test<Len<"">>(); // $ExpectType 0
 
 test<Chars<"abc">>(); // $ExpectType ["a", "b", "c"]
 test<Chars<"">>(); // $ExpectType []
+
+test<ParseInts<"1+2.3-4">>(); // $ExpectType [1, 2, 3, 4]
+test<ParseInts<"">>(); // $ExpectType []
+test<ParseInts<" 1234 5 ">>(); // $ExpectType [1234, 5]
