@@ -1,9 +1,15 @@
-import { Array, Integer } from "index";
+import { Array, Integer, String } from "index";
 
 export {};
 
-export type PartA<Input extends string[]> = Calculate<Input, LookupA>;
-export type PartABig<Input extends string[]> = CalculateBig<Input, LookupA>;
+export type PartA<
+  Input extends string,
+  InputArr extends string[] = String.Split<String.Trim<Input>, "\n">
+> = Calculate<InputArr, LookupA>;
+export type PartABig<
+  Input extends string,
+  InputArr extends string[] = String.Split<String.Trim<Input>, "\n">
+> = CalculateBig<InputArr, LookupA>;
 type LookupA = {
   "A X": 4;
   "A Y": 8;
@@ -16,8 +22,14 @@ type LookupA = {
   "C Z": 6;
 };
 
-export type PartB<Input extends string[]> = Calculate<Input, LookupB>;
-export type PartBBig<Input extends string[]> = CalculateBig<Input, LookupB>;
+export type PartB<
+  Input extends string,
+  InputArr extends string[] = String.Split<String.Trim<Input>, "\n">
+> = Calculate<InputArr, LookupB>;
+export type PartBBig<
+  Input extends string,
+  InputArr extends string[] = String.Split<String.Trim<Input>, "\n">
+> = CalculateBig<InputArr, LookupB>;
 type LookupB = {
   "A X": 3;
   "A Y": 4;
@@ -34,7 +46,7 @@ type Calculate<
   Input extends string[],
   LookupTable extends Record<string, number>,
   Points extends Integer.Number[] = GetPoints<Input, LookupTable>
-> = Integer.ToNumber<Array._SumBinary<Points>>;
+> = Integer.ToNumber<Array._Sum<Points>>;
 
 type PartitionSize = Integer.FromDecimal<1500>;
 type CalculateBig<
@@ -43,12 +55,8 @@ type CalculateBig<
   Points extends Integer.Number[] = GetPoints<Input, LookupTable>,
   Len extends Integer.Number = Integer.FromDecimal<Input["length"]>,
   PartitionedSum extends Integer.Number = Integer.Add<
-    Array._SumBinary<Points, Integer.Zero, PartitionSize>,
-    Array._SumBinary<
-      Points,
-      PartitionSize,
-      Integer.Subtract<Len, PartitionSize>
-    >
+    Array._Sum<Points, Integer.Zero, PartitionSize>,
+    Array._Sum<Points, PartitionSize, Integer.Subtract<Len, PartitionSize>>
   >
 > = Integer.ToNumber<PartitionedSum>;
 

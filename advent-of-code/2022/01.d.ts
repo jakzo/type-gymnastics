@@ -6,7 +6,7 @@ export type PartA<A extends number[][]> = Array.Max<GetInputSums<A>>;
 
 export type PartB<A extends number[][]> = Array.Sum<Top<GetInputSums<A>, 3>>;
 
-export type PartBSort<A extends number[][]> = Array.SumBinary<TopSorted<A>>;
+export type PartBSort<A extends number[][]> = Array.Sum<TopSorted<A>>;
 type TopSorted<A extends number[][]> = Array.SplitAt<
   GetInputSortedSums<A>,
   3

@@ -2,11 +2,14 @@ import { Array, Integer, String } from "index";
 
 export {};
 
-export type PartA<Input extends string[]> = CalcResult<{
-  [K in keyof Input]: CommonChar<Input[K]>;
+export type PartA<
+  Input extends string,
+  InputArr extends string[] = String.Split<String.Trim<Input>, "\n">
+> = CalcResult<{
+  [K in keyof InputArr]: CommonChar<InputArr[K]>;
 }>;
 
-type CalcResult<Chars extends string[]> = Array.SumBinary<{
+type CalcResult<Chars extends string[]> = Array.Sum<{
   [K in keyof Chars]: CalcPoints<Chars[K]>;
 }>;
 type CalcPoints<Ch extends string> = CharMap &
@@ -24,8 +27,9 @@ type CommonChar<
   String.Chars<String._Chomp<Str, HalfLen>>[number];
 
 export type PartB<
-  Input extends string[],
-  Groups = Array.Chunked<Input, 3>
+  Input extends string,
+  InputArr extends string[] = String.Split<String.Trim<Input>, "\n">,
+  Groups = Array.Chunked<InputArr, 3>
 > = CalcResult<
   AsStringArr<{
     [K in keyof Groups]: GroupCommon<Groups[K]>;

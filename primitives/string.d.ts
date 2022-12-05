@@ -1,5 +1,6 @@
 /** @fileoverview Utilities for working with strings. */
 
+import * as Array from "./array";
 import * as Integer from "./integer";
 
 export {};
@@ -87,11 +88,22 @@ export type _Len<Str extends string> = Str extends `${infer _Ch}${infer Rest}`
   ? Integer.Increment<_Len<Rest>>
   : Integer.Zero;
 
+/**
+ * Returns a substring of `Str`.
+ *
+ * @example
+ *     type R = String.Substr<"abcdef", 2, 3>; // => "cde"
+ */
 export type Substr<
   Str extends string,
   Idx extends number,
   Len extends number
 > = Take<Chomp<Str, Idx>, Len>;
+export type _Substr<
+  Str extends string,
+  Idx extends Integer.Number,
+  Len extends Integer.Number
+> = _Take<_Chomp<Str, Idx>, Len>;
 
 /**
  * Returns a list of characters in `Str`.
@@ -109,18 +121,14 @@ export type Chars<Str extends string> = Str extends `${infer Ch}${infer Rest}`
  * @example
  *     type R = String.ParseInts<"1+2.3-4">; // => [1, 2, 3, 4]
  */
-export type ParseInts<Str extends string> = _ParseInts<Str> extends infer Res
-  ? {
-      [K in keyof Res]: Res[K] extends Integer.Number
-        ? Integer.ToNumber<Res[K]>
-        : never;
-    }
-  : never;
+export type ParseInts<Str extends string> = Array.MapIntToNum<_ParseInts<Str>>;
 export type _ParseInts<
   Str extends string,
   Res extends Integer.Number[] = [],
   Digits extends string = ""
-> = Str extends `${infer Ch}${infer Rest}`
+> = 0 extends 1
+  ? never
+  : Str extends `${infer Ch}${infer Rest}`
   ? Ch extends Integer.Digit
     ? _ParseInts<Rest, Res, `${Digits}${Ch}`>
     : _ParseInts<Rest, _ParseIntsAdd<Res, Digits>, "">
@@ -131,3 +139,63 @@ type _ParseIntsAdd<
 > = Digits extends `${Integer.Digit}${string}`
   ? [...Res, Integer.FromDecimal<Digits>]
   : Res;
+
+/**
+ * Splits `Str` into a list of strings by removing `Separator`.
+ *
+ * @example
+ *     type R = String.Split<"a.bc.def", ".">; // => ["a", "bc", "def"]
+ */
+export type Split<
+  Str extends string,
+  Separator extends string,
+  Res extends string[] = [],
+  Acc extends string = ""
+> = true extends true
+  ? Str extends `${Separator}${infer Rest}`
+    ? Split<Rest, Separator, [...Res, Acc]>
+    : Str extends `${infer Ch}${infer Rest}`
+    ? Split<Rest, Separator, Res, `${Acc}${Ch}`>
+    : [...Res, Acc]
+  : [];
+
+/**
+ * Removes all instances of `Remove` from the start and end of `Str`.
+ *
+ * `Remove` defaults to any whitespace.
+ *
+ * @example
+ *     type R = String.Trim<" a\n">; // => "a"
+ *     type R = String.Trim<"..a..", ".">; // => "a"
+ */
+export type Trim<
+  Str extends string,
+  Remove extends string = Whitespace
+> = true extends false
+  ? never
+  : Str extends `${Remove}${infer Rest}`
+  ? Trim<Rest, Remove>
+  : Str extends `${infer Rest}${Remove}`
+  ? Trim<Rest, Remove>
+  : Str;
+
+export type Whitespace = " " | "\t" | "\n";
+
+/**
+ * Joins all items in `Arr` into a string with `Separator` between them.
+ *
+ * @example
+ *     type R = String.Join<["a", "b", "c"]>; // => "abc"
+ *     type R = String.Join<["a", "b", "c"], ".">; // => "a.b.c"
+ */
+export type Join<
+  Arr extends string[],
+  Separator extends string = ""
+> = Arr extends [infer Item extends string, ...infer Rest extends string[]]
+  ? `${Item}${_JoinRest<Rest, Separator>}`
+  : "";
+type _JoinRest<Arr extends string[], Separator extends string> = 0 extends 1
+  ? never
+  : Arr extends [infer Item extends string, ...infer Rest extends string[]]
+  ? `${Separator}${Item}${_JoinRest<Rest, Separator>}`
+  : "";

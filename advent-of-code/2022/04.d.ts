@@ -3,8 +3,9 @@ import { Array, Integer, String } from "index";
 export {};
 
 export type PartA<
-  Input extends string[],
-  Pairs extends Pair[] = Parse<Input>
+  Input extends string,
+  Lines extends string[] = String.Split<Input, "\n">,
+  Pairs extends Pair[] = Parse<Lines>
 > = Array.Count<{ [K in keyof Pairs]: IsEncapsulated<Pairs[K]> }>;
 
 type IsEncapsulated<P extends Pair> = true extends
@@ -16,8 +17,9 @@ type IsEncapsulated<P extends Pair> = true extends
   : false;
 
 export type PartB<
-  Input extends string[],
-  Pairs extends Pair[] = Parse<Input>
+  Input extends string,
+  Lines extends string[] = String.Split<Input, "\n">,
+  Pairs extends Pair[] = Parse<Lines>
 > = Array.Count<{ [K in keyof Pairs]: IsOverlapping<Pairs[K]> }>;
 
 type IsOverlapping<P extends Pair> = true extends

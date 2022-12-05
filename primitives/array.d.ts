@@ -103,7 +103,7 @@ export type _MaxIndex<
  *     type R = Array.MapNumToInt<[1, 2, 3]>;
  *     // => ["0b1", "0b01", "0b11"]
  */
-export type MapNumToInt<A extends number[]> = {
+export type MapNumToInt<A extends (number | string)[]> = {
   [K in keyof A]: K extends `${number}` ? Integer.FromDecimal<A[K]> : never;
 };
 
@@ -121,9 +121,9 @@ export type MapIntToNum<A extends Integer.Number[]> = {
 /**
  * Adds all numbers in a list together and returns the result.
  *
- * - Limits: `Arr` = 80
+ * - Limits: `Arr` = 2000
  * - Time: `O(n)`
- * - Space: `O(n^2)`
+ * - Space: `O(n log n)`
  *
  * @example
  *     type R = Array.Sum<[1, 2, 3]>; // => 6
@@ -132,39 +132,20 @@ export type Sum<Arr extends number[]> = Integer.ToNumber<
   _Sum<MapNumToInt<Arr>>
 >;
 
-export type _Sum<Arr extends Integer.Number[]> = Arr extends [
-  infer N extends Integer.Number,
-  ...infer Rest extends Integer.Number[]
-]
-  ? Integer.Add<N, _Sum<Rest>>
-  : Integer.Zero;
-
-/**
- * Adds all numbers in a list together and returns the result.
- *
- * - Limits: `Arr` = 2000
- * - Time: `O(n)`
- * - Space: `O(n log n)`
- *
- * @example
- *     type R = Array.Sum<[1, 2, 3]>; // => 6
- */
-export type SumBinary<Arr extends number[]> = Integer.ToNumber<
-  _SumBinary<MapNumToInt<Arr>>
->;
-
-export type _SumBinary<
+export type _Sum<
   Arr extends Integer.Number[],
   Idx extends Integer.Number = Integer.Zero,
   Len extends Integer.Number = Integer.FromDecimal<Arr["length"]>,
   HalfLen extends Integer.Number = Integer.ShiftRight<Len, Integer.One>
-> = Len extends Integer.Zero
+> = 0 extends 1
+  ? never
+  : Len extends Integer.Zero
   ? Integer.Zero
   : Len extends Integer.One
   ? Arr[Integer.ToNumber<Idx>]
   : Integer.Add<
-      _SumBinary<Arr, Idx, HalfLen>,
-      _SumBinary<
+      _Sum<Arr, Idx, HalfLen>,
+      _Sum<
         Arr,
         Integer.Add<Idx, HalfLen>,
         Len extends Integer.Odd ? Integer.Increment<HalfLen> : HalfLen
@@ -183,7 +164,7 @@ export type _SumBinary<
  *     type R = Array.Count<["x", "y", "z", "y"], "y">; // => 2
  */
 export type Count<Arr extends unknown[], Value = true> = Integer.ToNumber<
-  _SumBinary<{
+  _Sum<{
     [K in keyof Arr]: Arr[K] extends Value ? Integer.One : Integer.Zero;
   }>
 >;
@@ -201,7 +182,7 @@ export type _BubbleSort<
   Arr extends Integer.Number[],
   SortedIndexes extends Integer.Number[] = {
     [K in keyof Arr]: K extends `${number}`
-      ? _SumBinary<{
+      ? _Sum<{
           [M in keyof Arr]: M extends `${number}`
             ? Integer.IsLessThan<Arr[M], Arr[K]> extends true
               ? Integer.One
@@ -451,3 +432,30 @@ export type ReverseMap<Arr extends unknown[]> = {
       >]
     : never;
 };
+
+/**
+ * Returns the last item of `Arr`.
+ *
+ * @example
+ *     type R = Array.Last<[1, 2, 3]>; // => 3
+ */
+export type Last<Arr extends unknown[]> = Arr[Integer.ToNumber<
+  Integer.Decrement<Integer.FromDecimal<Arr["length"]>>
+>];
+
+/**
+ * Replaces the item at `Idx` of `Arr` with `Value`.
+ *
+ * @example
+ *     type R = Array.UpdateAt<[1, 2, 3], 1, 9>; // => [1, 9, 3]
+ */
+export type UpdateAt<
+  Arr extends unknown[],
+  Idx extends number,
+  Value
+> = _UpdateAt<Arr, Integer.FromDecimal<Idx>, Value>;
+type _UpdateAt<Arr extends unknown[], Idx extends Integer.Number, Value> = [
+  ..._Slice<Arr, Integer.Zero, Idx>,
+  Value,
+  ..._Slice<Arr, Integer.Increment<Idx>>
+];

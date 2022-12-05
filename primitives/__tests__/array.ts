@@ -9,13 +9,14 @@ import {
   MergeSort,
   SplitAt,
   Sum,
-  SumBinary,
   BubbleSort,
   _ArrOfLen,
   MaxIndex,
   ReverseMap,
   Range,
   Count,
+  Last,
+  UpdateAt,
 } from "primitives/array";
 
 test<Create<[3, 2], 1>>(); // $ExpectType [[1, 1, 1], [1, 1, 1]]
@@ -29,12 +30,11 @@ test<MaxIndex<[7, 4, 9, 5]>>(); // $ExpectType 2
 test<MaxIndex<[23, 111, 3]>>(); // $ExpectType 1
 
 test<MapNumToInt<[1, 2, 3]>>(); // $ExpectType ["0b1", "0b01", "0b11"]
+test<MapNumToInt<["1", "2", "3"]>>(); // $ExpectType ["0b1", "0b01", "0b11"]
 
 test<MapIntToNum<["0b1", "0b01", "0b11"]>>(); // $ExpectType [1, 2, 3]
 
 test<Sum<[1, 2, 3]>>(); // $ExpectType 6
-
-test<SumBinary<[1, 2, 3]>>(); // $ExpectType 6
 
 test<SplitAt<[1, 2, 3, 4, 5], 2>>(); // $ExpectType [[1, 2], [3, 4, 5]]
 test<SplitAt<[], 0>>(); // $ExpectType [[], []]
@@ -72,3 +72,8 @@ test<Count<["x", "y", "z", "y"], "y">>(); // $ExpectType 2
 test<Count<[1, 2, 3], 4>>(); // $ExpectType 0
 test<Count<[1, 2, 3, 2, 1], 2 | 3>>(); // $ExpectType 3
 test<Count<[1, 1, 1, 1, 1], 1>>(); // $ExpectType 5
+
+test<Last<[1, 2, 3]>>(); // $ExpectType 3
+
+test<UpdateAt<[1, 2, 3], 1, 9>>(); // $ExpectType [1, 9, 3]
+test<UpdateAt<["a", "b", "c"], 0, "x">>(); // $ExpectType ["x", "b", "c"]
