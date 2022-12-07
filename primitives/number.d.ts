@@ -10,6 +10,25 @@ export {};
 export type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 /**
+ * Returns `true` if `A` is equal to `B`.
+ *
+ * @example
+ *     type R = Number.IsEqual<4, 4>; // => true
+ */
+export type IsEqual<
+  A extends number | bigint | string,
+  B extends number | bigint | string
+> = `${A}` extends `${infer ANum extends number | bigint}`
+  ? `${B}` extends `${infer BNum extends number | bigint}`
+    ? ANum extends BNum
+      ? number | bigint extends BNum
+        ? false
+        : true
+      : false
+    : false
+  : false;
+
+/**
  * Returns `true` if `A` is less than `B`.
  *
  * @example
@@ -20,7 +39,7 @@ export type IsLessThan<
   B extends number | bigint | string,
   AStr extends string = `${A}`,
   BStr extends string = `${B}`
-> = A extends B
+> = IsEqual<A, B> extends true
   ? false
   : AStr extends `-${infer ANum extends number | bigint}`
   ? BStr extends `-${infer BNum extends number | bigint}`
@@ -108,3 +127,38 @@ type _DigitLookups = [
   [0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
+
+/**
+ * Returns `true` if `A` is less than or equal to `B`.
+ *
+ * @example
+ *     type R = Number.IsLessThanOrEqual<3, 4>; // => true
+ *     type R = Number.IsLessThanOrEqual<4, 4>; // => true
+ */
+export type IsLessThanOrEqual<
+  A extends number | bigint | string,
+  B extends number | bigint | string
+> = IsEqual<A, B> extends true ? true : IsLessThan<A, B>;
+
+/**
+ * Returns `true` if `A` is greater than `B`.
+ *
+ * @example
+ *     type R = Number.IsGreater<5, 4>; // => true
+ */
+export type IsGreaterThan<
+  A extends number | bigint | string,
+  B extends number | bigint | string
+> = IsLessThan<B, A>;
+
+/**
+ * Returns `true` if `A` is greater than or equal to `B`.
+ *
+ * @example
+ *     type R = Number.IsGreaterThanOrEqual<5, 4>; // => true
+ *     type R = Number.IsGreaterThanOrEqual<4, 4>; // => true
+ */
+export type IsGreaterThanOrEqual<
+  A extends number | bigint | string,
+  B extends number | bigint | string
+> = IsEqual<A, B> extends true ? true : IsLessThan<B, A>;

@@ -460,7 +460,12 @@ export type UpdateAt<
   Idx extends number,
   Value
 > = _UpdateAt<Arr, Integer.FromDecimal<Idx>, Value>;
-type _UpdateAt<Arr extends unknown[], Idx extends Integer.Number, Value> = [
+
+export type _UpdateAt<
+  Arr extends unknown[],
+  Idx extends Integer.Number,
+  Value
+> = [
   ..._Slice<Arr, Integer.Zero, Idx>,
   Value,
   ..._Slice<Arr, Integer.Increment<Idx>>

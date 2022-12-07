@@ -1,4 +1,6 @@
+import { Integer } from "index";
 import {
+  IsEqual,
   // Add,
   // And,
   // Decrement,
@@ -7,10 +9,10 @@ import {
   // FromBase,
   // FromDecimal,
   // Increment,
-  // IsGreaterThan,
-  // IsGreaterThanOrEqual,
+  IsGreaterThan,
+  IsGreaterThanOrEqual,
   IsLessThan,
-  // IsLessThanOrEqual,
+  IsLessThanOrEqual,
   // Modulo,
   // Multiply,
   // Nand,
@@ -24,6 +26,18 @@ import {
   // ToNumber,
   // Xor,
 } from "primitives/number";
+
+test<IsEqual<0, 0>>(); // $ExpectType true
+test<IsEqual<1, 0>>(); // $ExpectType false
+test<IsEqual<0, 1>>(); // $ExpectType false
+test<IsEqual<-123, -123>>(); // $ExpectType true
+test<IsEqual<-123, 123>>(); // $ExpectType false
+test<IsEqual<123, 123>>(); // $ExpectType true
+test<IsEqual<"123", 123>>(); // $ExpectType true
+test<IsEqual<"123.0", 123>>(); // $ExpectType false
+test<IsEqual<123, "123.0">>(); // $ExpectType false
+test<IsEqual<"123.0", "123.0">>(); // $ExpectType false
+test<IsEqual<123n, 123>>(); // $ExpectType true
 
 test<IsLessThan<0, 0>>(); // $ExpectType false
 test<IsLessThan<1, 0>>(); // $ExpectType false
@@ -64,17 +78,18 @@ test<IsLessThan<"0.05", "0.04">>(); // $ExpectType false
 test<IsLessThan<20, 100n>>(); // $ExpectType true
 test<IsLessThan<100n, 20>>(); // $ExpectType false
 
-// test<IsLessThanOrEqual<"0b110101", "0b101101">>(); // $ExpectType true
-// test<IsLessThanOrEqual<"0b101101", "0b110101">>(); // $ExpectType false
-// test<IsLessThanOrEqual<"0b101101", "0b101101">>(); // $ExpectType true
+test<IsLessThanOrEqual<43, 45>>(); // $ExpectType true
+test<IsLessThanOrEqual<45, 43>>(); // $ExpectType false
+test<IsLessThanOrEqual<45, 45>>(); // $ExpectType true
+test<IsLessThanOrEqual<45n, 45>>(); // $ExpectType true
 
-// test<IsGreaterThan<"0b1101", "0b1101">>(); // $ExpectType false
-// test<IsGreaterThan<"0b010001", "0b001001">>(); // $ExpectType false
-// test<IsGreaterThan<"0b001001", "0b010001">>(); // $ExpectType true
+test<IsGreaterThan<11, 11>>(); // $ExpectType false
+test<IsGreaterThan<34, 36>>(); // $ExpectType false
+test<IsGreaterThan<36, 34>>(); // $ExpectType true
 
-// test<IsGreaterThanOrEqual<"0b110101", "0b101101">>(); // $ExpectType false
-// test<IsGreaterThanOrEqual<"0b101101", "0b110101">>(); // $ExpectType true
-// test<IsGreaterThanOrEqual<"0b101101", "0b101101">>(); // $ExpectType true
+test<IsGreaterThanOrEqual<43, 45>>(); // $ExpectType false
+test<IsGreaterThanOrEqual<45, 43>>(); // $ExpectType true
+test<IsGreaterThanOrEqual<45, 45>>(); // $ExpectType true
 
 // test<Not<"0b">>(); // $ExpectType "0b"
 // test<Not<"0b1">>(); // $ExpectType "0b"
