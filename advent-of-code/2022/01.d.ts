@@ -1,39 +1,39 @@
-import { Array, Integer } from "index";
+import { Array, Integer, String } from "index";
 
 export {};
 
-export type PartA<A extends number[][]> = Array.Max<GetInputSums<A>>;
+export type PartA<Input extends string> = Integer.ToNumber<
+  Array._Max<GetInputSums<Input>>
+>;
 
-export type PartB<A extends number[][]> = Array.Sum<Top<GetInputSums<A>, 3>>;
+export type PartB<Input extends string> = Integer.ToNumber<
+  Array._Sum<Top<GetInputSums<Input>, Integer.Three>>
+>;
 
-export type PartBSort<A extends number[][]> = Array.Sum<TopSorted<A>>;
-type TopSorted<A extends number[][]> = Array.SplitAt<
-  GetInputSortedSums<A>,
-  3
->[0] extends infer R extends number[]
-  ? R
-  : never;
+export type PartBSort<Input extends string> = Integer.ToNumber<
+  Array._Sum<
+    Array.Slice<Array.ReverseMap<Array._MergeSort<GetInputSums<Input>>>, 0, 3>
+  >
+>;
 
-type GetInputSums<A extends number[][]> = {
-  [K in keyof A]: A[K] extends number[] ? Array.Sum<A[K]> : never;
+type GetInputSums<
+  Input extends string,
+  Groups extends string[] = String.Split<Input, "\n\n">
+> = {
+  [K in keyof Groups]: K extends `${number}`
+    ? Array._Sum<String._ParseInts<Groups[K]>>
+    : never;
 };
 
-type GetInputSortedSums<A extends number[][]> = Array.Reverse<
-  Array.BubbleSort<GetInputSums<A>>
->;
-
-type Top<A extends number[], N extends number> = _Top<
-  A,
-  Integer.FromDecimal<N>
->;
-type _Top<
-  A extends number[],
+type Top<
+  A extends Integer.Number[],
   N extends Integer.Number,
-  MI extends string = `${Array.MaxIndex<A>}`
+  Res extends Integer.Number[] = [],
+  MI extends string = `${Integer.ToNumber<Array._MaxIndex<A>>}`
 > = N extends Integer.Zero
-  ? []
-  : // @ts-expect-error
-    [
-      ...(MI extends keyof A ? [A[MI]] : []),
-      ..._Top<{ [K in keyof A]: K extends MI ? 0 : A[K] }, Integer.Decrement<N>>
-    ];
+  ? Res
+  : Top<
+      { [K in keyof A]: K extends MI ? Integer.Zero : A[K] },
+      Integer.Decrement<N>,
+      MI extends keyof A ? [...Res, A[MI]] : Res
+    >;

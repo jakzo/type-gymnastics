@@ -213,14 +213,16 @@ export type _BubbleSort<
  * Time complexity is `O(n log n)` and recursion is `O(n)`.
  */
 export type MergeSort<Arr extends number[]> = MapIntToNum<
-  _MergeSort<MapNumToInt<Arr>, Integer.FromDecimal<Arr["length"]>>
+  _MergeSort<MapNumToInt<Arr>>
 >;
 
 export type _MergeSort<
   Arr extends Integer.Number[],
-  Len extends Integer.Number,
+  Len extends Integer.Number = Integer.FromDecimal<Arr["length"]>,
   Size extends Integer.Number = Integer.One
-> = Integer.IsGreaterThan<Len, Size> extends true
+> = 0 extends 1
+  ? never
+  : Integer.IsGreaterThan<Len, Size> extends true
   ? _MergeSort<
       _SortSubarraysOfSize<Arr, Size>,
       Len,
@@ -369,7 +371,9 @@ export type _Slice<
     Idx
   >,
   HalfLen extends Integer.Number = Integer.ShiftRight<Len, Integer.One>
-> = Len extends Integer.Zero
+> = 0 extends 1
+  ? never
+  : Len extends Integer.Zero
   ? []
   : Len extends Integer.One
   ? [Arr[Integer.ToNumber<Idx> extends infer N extends number ? N : never]]
@@ -397,7 +401,9 @@ export type Reverse<
   Idx extends Integer.Number = Integer.Zero,
   Size extends Integer.Number = Integer.FromDecimal<Arr["length"]>,
   HalfSize extends Integer.Number = Integer.ShiftRight<Size, Integer.One>
-> = Size extends Integer.Zero
+> = 0 extends 1
+  ? never
+  : Size extends Integer.Zero
   ? []
   : Size extends Integer.One
   ? [Arr[Integer.ToNumber<Idx>]]
